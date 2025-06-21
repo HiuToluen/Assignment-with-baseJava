@@ -14,10 +14,6 @@ import com.hiutoluen.leave_management.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-/**
- * Base controller to enforce authentication for all requests except /login and
- * /register.
- */
 @Controller
 public abstract class BaseAuthenticationController {
 
@@ -47,22 +43,17 @@ public abstract class BaseAuthenticationController {
     protected abstract void processPost(HttpServletRequest request, HttpSession session, Object... args)
             throws IOException;
 
-    @GetMapping("/**")
+    // Chỉ áp dụng cho các endpoint động, không bao gồm tài nguyên tĩnh
+    @GetMapping(value = "/{path:[^\\.]*}")
     public String handleGet(HttpServletRequest request, HttpSession session, Object... args) throws IOException {
-        String requestURI = request.getRequestURI();
-        if (!requestURI.equals("/login") && !requestURI.equals("/register")) {
-            getCurrentUser(session);
-        }
+        getCurrentUser(session);
         processGet(request, session, args);
         return null;
     }
 
-    @PostMapping("/**")
+    @PostMapping(value = "/{path:[^\\.]*}")
     public String handlePost(HttpServletRequest request, HttpSession session, Object... args) throws IOException {
-        String requestURI = request.getRequestURI();
-        if (!requestURI.equals("/login") && !requestURI.equals("/register")) {
-            getCurrentUser(session);
-        }
+        getCurrentUser(session);
         processPost(request, session, args);
         return null;
     }

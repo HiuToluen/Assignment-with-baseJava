@@ -4,6 +4,7 @@
         <html>
 
         <head>
+            <link rel="stylesheet" href="/css/style.css" />
             <title>Admin - Manage Users</title>
         </head>
 
