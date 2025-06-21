@@ -85,4 +85,9 @@ public class AuthPublicController {
         session.invalidate();
         return "redirect:/login";
     }
+
+    @GetMapping("/")
+    public String root() {
+        return "redirect:/login";
+    }
 }

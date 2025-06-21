@@ -43,16 +43,23 @@ public abstract class BaseAuthenticationController {
     protected abstract void processPost(HttpServletRequest request, HttpSession session, Object... args)
             throws IOException;
 
-    // Chỉ áp dụng cho các endpoint động, không bao gồm tài nguyên tĩnh
-    @GetMapping(value = "/{path:[^\\.]*}")
+    @GetMapping(value = "/{path:[^\\.]*}", params = "path!=login")
     public String handleGet(HttpServletRequest request, HttpSession session, Object... args) throws IOException {
+        String requestURI = request.getRequestURI();
+        if (requestURI.equals("/") || requestURI.startsWith("/login") || requestURI.startsWith("/register")) {
+            return null;
+        }
         getCurrentUser(session);
         processGet(request, session, args);
         return null;
     }
 
-    @PostMapping(value = "/{path:[^\\.]*}")
+    @PostMapping(value = "/{path:[^\\.]*}", params = "path!=login")
     public String handlePost(HttpServletRequest request, HttpSession session, Object... args) throws IOException {
+        String requestURI = request.getRequestURI();
+        if (requestURI.equals("/") || requestURI.startsWith("/login") || requestURI.startsWith("/register")) {
+            return null;
+        }
         getCurrentUser(session);
         processPost(request, session, args);
         return null;
