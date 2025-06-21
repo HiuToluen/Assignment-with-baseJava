@@ -114,3 +114,14 @@ ALTER TABLE Access_Scope
 ADD CONSTRAINT FK_Access_Scope_Accessor FOREIGN KEY (accessor_id) REFERENCES Users(user_id),
     CONSTRAINT FK_Access_Scope_TargetUser FOREIGN KEY (target_user_id) REFERENCES Users(user_id),
     CONSTRAINT FK_Access_Scope_TargetDept FOREIGN KEY (target_department_id) REFERENCES Departments(department_id);
+
+ALTER TABLE User_Roles
+DROP CONSTRAINT FK_User_Roles_User;
+GO
+
+ALTER TABLE User_Roles
+ADD CONSTRAINT FK_User_Roles_User
+FOREIGN KEY (user_id)
+REFERENCES Users(user_id)
+ON DELETE CASCADE;
+GO

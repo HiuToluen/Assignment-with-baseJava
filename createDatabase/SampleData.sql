@@ -2,22 +2,32 @@
 INSERT INTO Roles (role_name) VALUES 
 ('Employee'), ('Manager'), ('Department Manager'), ('Director');
 
--- Insert features with entrypoint
+-- Insert features with entrypoint (updated to match the 3 main functionalities)
 INSERT INTO Features (feature_name, entrypoint) VALUES 
-('Create Leave Request', '/leaveRequests/create'),
-('Process Leave Request', '/leaveRequests/process'),
-('View Department Agenda', '/agenda/department'),
-('View Company Agenda', '/agenda/company'),
-('Manage Permissions', '/admin/permissions'),
-('View All Requests', '/leaveRequests/all');
+('Create Leave Request', '/request/create'),
+('View Subordinate Requests', '/request/view-subordinates'),
+('View Agenda', '/agenda');
 
--- Insert role-feature mappings
+-- Insert role-feature mappings (updated to match role permissions)
 INSERT INTO Role_Features (role_id, feature_id) VALUES
 (1, 1), -- Employee: Create Leave Request
-(2, 1), (2, 2), (2, 3), -- Manager: Create, Process, View Dept Agenda
-(3, 1), (3, 2), (3, 3), -- Dept Manager: Create, Process, View Dept Agenda
-(4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6); -- Director: All permissions
+(1, 3), -- Employee: View Agenda
+(2, 1), -- Manager: Create Leave Request
+(2, 2), -- Manager: View Subordinate Requests
+(2, 3), -- Manager: View Agenda
+(3, 1), -- Department Manager: Create Leave Request
+(3, 2), -- Department Manager: View Subordinate Requests
+(3, 3), -- Department Manager: View Agenda
+(4, 1), -- Director: Create Leave Request
+(4, 2), -- Director: View Subordinate Requests
+(4, 3); -- Director: View Agenda
 
+-- Insert specific departments
+INSERT INTO Departments (department_name, id_manager) VALUES 
+('IT Department', NULL),
+('HR Department', NULL),
+('Finance Department', NULL),
+('Marketing Department', NULL);
 -- Insert specific departments
 INSERT INTO Departments (department_name, id_manager) VALUES 
 ('IT Department', NULL),
