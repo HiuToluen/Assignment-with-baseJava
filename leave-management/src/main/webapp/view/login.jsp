@@ -7,8 +7,6 @@
             <title>Login - Leave Management</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
             <link rel="stylesheet" href="/css/style.css" />
-
-
         </head>
 
         <body class="login-body">
@@ -28,6 +26,9 @@
                             <button type="submit" class="btn btn-custom w-100">Login</button>
                             <p class="text-danger mt-3">${error}</p>
                         </form:form>
+                        <div class="text-center mt-3">
+                            <a href="/oauth2/google" class="btn btn-custom w-100">Login with Google</a>
+                        </div>
                         <a href="${pageContext.request.contextPath}/register" class="d-block text-center mt-3">Register
                             a new account</a>
                     </div>

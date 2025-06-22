@@ -202,6 +202,12 @@ public class UserService {
         return existingUser;
     }
 
+    public String generateRandomPassword() {
+        String randomBase = "random" + System.currentTimeMillis();
+        String fixedSalt = "$2a$12$abcdefghijklmnopqrstuv";
+        return BCrypt.hashpw(randomBase, fixedSalt);
+    }
+
     /**
      * Saves updates to a list of users, including their information and roles.
      *
