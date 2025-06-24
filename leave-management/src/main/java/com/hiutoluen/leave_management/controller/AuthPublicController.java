@@ -60,11 +60,16 @@ public class AuthPublicController {
         this.departmentRepository = departmentRepository;
     }
 
+    @GetMapping("/")
+    public String root() {
+        return "redirect:/login";
+    }
+
     @GetMapping("/login")
     public String loginPage(Model model, HttpSession session) {
         String error = (String) session.getAttribute("error");
         model.addAttribute("user", new User());
-        model.addAttribute("error", error);
+        model.addAttribute("error", error != null ? error : "");
         session.removeAttribute("error");
         return "login";
     }
@@ -74,11 +79,11 @@ public class AuthPublicController {
         User existingUser = userService.findByUsername(user.getUsername());
         if (existingUser != null && BCrypt.checkpw(user.getPassword(), existingUser.getPassword())) {
             session.setAttribute("currentUser", existingUser);
+            System.out.println("Logged in user: " + existingUser.getUsername());
             if ("admin".equalsIgnoreCase(existingUser.getUsername())) {
                 return "redirect:/admin/users";
-            } else {
-                return "redirect:/home";
             }
+            return "redirect:/home";
         } else {
             session.setAttribute("error", "Invalid credentials");
             return "redirect:/login";
@@ -100,13 +105,19 @@ public class AuthPublicController {
             return "register";
         }
         try {
+            User existingUser = userService.findByUsername(user.getUsername());
+            if (existingUser != null) {
+                model.addAttribute("departments", departmentRepository.findAll());
+                model.addAttribute("error", "Username already exists");
+                return "register";
+            }
             User registeredUser = userService.registerUser(user);
-            session.setAttribute("currentUser", registeredUser);
+            session.setAttribute("currentUser", registeredUser); // Kiểm tra
+            System.out.println("Registered user: " + registeredUser.getUsername());
             return "redirect:/login";
         } catch (Exception e) {
-            System.out.println("Registration failed: " + e.getMessage());
             model.addAttribute("departments", departmentRepository.findAll());
-            model.addAttribute("error", "Registration failed. Please try again.");
+            model.addAttribute("error", "Registration failed. Please try again");
             return "register";
         }
     }
@@ -114,11 +125,6 @@ public class AuthPublicController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
-    }
-
-    @GetMapping("/")
-    public String root() {
         return "redirect:/login";
     }
 
@@ -135,46 +141,40 @@ public class AuthPublicController {
         try {
             NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-
             if (code == null || code.isEmpty()) {
                 session.setAttribute("error", "Missing authorization code");
                 return "redirect:/login";
             }
-
             AuthorizationCodeTokenRequest tokenRequest = new AuthorizationCodeTokenRequest(
                     httpTransport, jsonFactory, new GenericUrl(tokenUri), code)
                     .setClientAuthentication(new ClientParametersAuthentication(clientId, clientSecret))
                     .setRedirectUri(redirectUri);
-
             TokenResponse tokenResponse = tokenRequest.execute();
-
-            // Gọi Google UserInfo API để lấy thông tin người dùng
             HttpRequestInitializer requestInitializer = request -> request.setParser(new JsonObjectParser(jsonFactory));
             HttpRequest userInfoRequest = httpTransport.createRequestFactory(requestInitializer)
                     .buildGetRequest(new GenericUrl(userInfoUri + "?access_token=" + tokenResponse.getAccessToken()));
             HttpResponse userInfoResponse = userInfoRequest.execute();
-
-            // Parse JSON response bằng Gson
             String jsonResponse = userInfoResponse.parseAsString();
             com.google.gson.JsonObject userInfo = com.google.gson.JsonParser.parseString(jsonResponse)
                     .getAsJsonObject();
             String email = userInfo.get("email").getAsString();
             String name = userInfo.get("name").getAsString();
-
-            User existingUser = userService.findByUsername(email.split("@")[0]);
+            User existingUser = userService.findByEmail(email);
             if (existingUser != null) {
-                session.setAttribute("error", "Email already registered. Please log in.");
-                return "redirect:/login";
+                session.setAttribute("currentUser", existingUser); // Kiểm tra
+                System.out.println("Google login user: " + existingUser.getUsername());
+                return "redirect:/home";
             }
-
             User newUser = new User();
-            newUser.setUsername(email.split("@")[0] + "_" + System.currentTimeMillis());
+            newUser.setUsername(email.split("@")[0]);
             newUser.setFullName(name);
             newUser.setEmail(email);
             newUser.setDepartmentId(1);
-            newUser.setPassword(userService.generateRandomPassword());
+            String fixedSalt = "$2a$12$abcdefghijklmnopqrstuv";
+            newUser.setPassword(BCrypt.hashpw("google" + System.currentTimeMillis(), fixedSalt));
             User savedUser = userService.registerUser(newUser);
-            session.setAttribute("currentUser", savedUser);
+            session.setAttribute("currentUser", savedUser); // Kiểm tra
+            System.out.println("New Google user registered: " + savedUser.getUsername());
             return "redirect:/home";
         } catch (Exception e) {
             e.printStackTrace();

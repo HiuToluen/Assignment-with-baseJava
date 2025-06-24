@@ -8,30 +8,24 @@ import com.hiutoluen.leave_management.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-/**
- * Base controller to enforce RBAC (Role-Based Access Control) after
- * authentication.
- */
 public abstract class BaseRBACController extends BaseAuthenticationController {
 
     protected BaseRBACController(UserService userService) {
         super(userService);
     }
 
-    @Override
     protected void processGet(HttpServletRequest request, HttpSession session, Object... args) throws IOException {
         User user = getCurrentUser(session);
-        String entrypoint = request.getRequestURI();
+        String entrypoint = request.getServletPath();
         if (!userService.hasPermission(user.getUsername(), entrypoint)) {
             throw new SecurityException("You do not have permission to access this feature");
         }
         processGetInternal(session, args);
     }
 
-    @Override
     protected void processPost(HttpServletRequest request, HttpSession session, Object... args) throws IOException {
         User user = getCurrentUser(session);
-        String entrypoint = request.getRequestURI();
+        String entrypoint = request.getServletPath();
         if (!userService.hasPermission(user.getUsername(), entrypoint)) {
             throw new SecurityException("You do not have permission to access this feature");
         }

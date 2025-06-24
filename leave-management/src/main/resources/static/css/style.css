@@ -1,14 +1,146 @@
-/* General Styles */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f7fa;
-  margin: 0;
-  padding: 20px;
+:root {
+  --bs-blue: #0d6efd;
+  --primary-light: #4e9bff;
+  --gray-bg: #eef3f8;
+  --header-gradient: linear-gradient(
+    135deg,
+    var(--bs-blue),
+    var(--primary-light)
+  );
 }
 
-/* Login/Register Page Styles */
-body.login-body {
-  background: linear-gradient(135deg, #007bff, #ffffff);
+/* ===== Base & Reset ===== */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--gray-bg);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+}
+
+.navbar .navbar-text {
+  font-size: 1rem;
+}
+
+/* ===== Card Layout ===== */
+.card {
+  border-radius: 1rem;
+  overflow: hidden;
+  border: none;
+  background-color: #ffffff;
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.05);
+}
+
+/* ===== Header Gradient Style ===== */
+.header-gradient {
+  background: var(--header-gradient);
+  color: white !important;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.header-gradient h3 {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.header-gradient p {
+  font-weight: 300;
+  color: #e8e8e8;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+/* ===== Form Styles ===== */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-control {
+  border-radius: 0.5rem;
+  border: 1px solid #ced4da;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--bs-blue);
+  box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+  outline: none;
+}
+
+.form-select {
+  border-radius: 0.5rem;
+  border: 1px solid #ced4da;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-select:focus {
+  border-color: var(--bs-blue);
+  box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+  outline: none;
+}
+
+/* ===== Button Styles ===== */
+.btn-primary {
+  background-color: var(--bs-blue);
+  border-color: var(--bs-blue);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.btn-outline-secondary {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* ===== Invalid Feedback ===== */
+.invalid-feedback {
+  display: block;
+  font-size: 0.875rem;
+  color: #dc3545;
+}
+
+/* ===== Login Body Styles ===== */
+.login-body {
+  background: linear-gradient(135deg, var(--bs-blue), var(--primary-light));
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -18,115 +150,26 @@ body.login-body {
 .login-container {
   max-width: 450px;
   padding: 30px;
-  border-radius: 15px;
-  background-color: rgba(240, 240, 240, 0.95); /* Adjusted to darker shade */
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
 }
 
-.logo {
-  width: 100px;
-  height: auto;
-  margin-bottom: 20px;
-}
-
-/* Form Styles */
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-label {
-  color: #333;
-}
-
-.form-group input {
-  border-radius: 8px;
-  transition: border-color 0.3s;
-}
-
-.form-group input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-/* Button Styles */
-.btn-custom {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: white;
-  border-radius: 8px;
-  padding: 12px;
-  font-weight: bold;
-  transition: all 0.3s;
-}
-
-.btn-custom:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-  transform: translateY(-2px);
-}
-
-/* Link Styles */
-a {
-  color: #007bff;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-a:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
-
-/* Error Message Styles */
-.text-danger {
-  color: red;
-  margin-top: 10px;
-}
-
-/* List Group Styles */
-.list-group-item {
-  border: none;
-  background-color: transparent;
-}
-
-.list-group-item a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.list-group-item a:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
-
-/* Admin Page Styles */
-.admin-container {
-  max-width: 900px;
-  padding: 20px;
-}
-
-.table-custom th,
-.table-custom td {
-  vertical-align: middle;
-  padding: 10px;
-}
-
-/* Request Page Styles */
-.request-container {
-  max-width: 500px;
-  padding: 20px;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .login-container {
-    max-width: 90%;
-    padding: 15px;
+/* ===== Responsive ===== */
+@media (max-width: 575.98px) {
+  .card {
+    margin: 0 1rem;
   }
   .form-group {
-    margin-bottom: 10px;
+    margin-bottom: 1rem;
   }
-  .btn-custom {
-    padding: 8px;
+  .form-control,
+  .form-select {
+    padding: 0.5rem 1rem;
+  }
+  .btn-primary,
+  .btn-outline-secondary {
+    padding: 0.5rem 1rem;
+    width: 100%;
   }
 }

@@ -1,5 +1,6 @@
 package com.hiutoluen.leave_management.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,81 +19,34 @@ import com.hiutoluen.leave_management.model.User;
 import com.hiutoluen.leave_management.repository.DepartmentRepository;
 import com.hiutoluen.leave_management.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-/**
- * Controller to handle authentication, home page, and user management
- * functionalities.
- */
 @Controller
 public class AuthController extends BaseRBACController {
 
     private final DepartmentRepository departmentRepository;
-
-    /**
-     * Constructs a new AuthController with the required dependencies.
-     *
-     * @param userService          The service to handle user-related business logic
-     * @param departmentRepository The repository to handle department-related data
-     */
 
     public AuthController(UserService userService, DepartmentRepository departmentRepository) {
         super(userService);
         this.departmentRepository = departmentRepository;
     }
 
-    /**
-     * Displays the home page with functionalities based on user roles.
-     *
-     * @param model   The model to add attributes for the view
-     * @param session The HTTP session to check the logged-in user
-     * @return The view name for the home page
-     */
-    @GetMapping("/home")
-    public String homePage(Model model, HttpSession session) {
-        processGetInternal(session);
-        List<Department> departments = departmentRepository.findAll();
-        if (departments == null) {
-            departments = List.of();
-        }
-        Map<Integer, String> managerNames = new HashMap<>();
-        for (User user : userService.findAllUsers()) {
-            managerNames.put(user.getUserId(), user.getFullName());
-        }
-        model.addAttribute("departments", departments);
-        model.addAttribute("managerNames", managerNames);
-
-        boolean canCreateRequest = true;
-        boolean canViewSubordinates = userService.hasPermission(getCurrentUser(session).getUsername(),
-                "/request/view-subordinates");
-        boolean canViewAgenda = true;
-        boolean canManageUsers = userService.hasPermission(getCurrentUser(session).getUsername(), "/admin/users");
-
-        model.addAttribute("canCreateRequest", canCreateRequest);
-        model.addAttribute("canViewSubordinates", canViewSubordinates);
-        model.addAttribute("canViewAgenda", canViewAgenda);
-        model.addAttribute("canManageUsers", canManageUsers);
-
-        return "home";
+    @GetMapping("/admin/**")
+    public String handleGet(HttpServletRequest request, HttpSession session, Object... args) throws IOException {
+        checkAndProcess(request, session);
+        return null;
     }
 
-    @Override
-    protected void processGetInternal(HttpSession session, Object... args) {
+    @PostMapping("/admin/**")
+    public String handlePost(HttpServletRequest request, HttpSession session, Object... args) throws IOException {
+        checkAndProcess(request, session);
+        return null;
     }
 
-    @Override
-    protected void processPostInternal(HttpSession session, Object... args) {
-    }
-
-    /**
-     * Displays the admin users management page.
-     *
-     * @param model   The model to add attributes for the view
-     * @param session The HTTP session to check the logged-in user
-     * @return The view name for the admin users page
-     */
     @GetMapping("/admin/users")
-    public String adminUsersPage(Model model, HttpSession session) {
+    public String adminUsersPage(Model model, HttpSession session, HttpServletRequest request) throws IOException {
+        checkAndProcess(request, session);
         processGetInternal(session);
         List<User> allUsers = userService.findAllUsers();
         List<Department> departments = departmentRepository.findAll();
@@ -109,15 +63,10 @@ public class AuthController extends BaseRBACController {
         return "admin-users";
     }
 
-    /**
-     * Displays the update user form for a specific user.
-     *
-     * @param userId The ID of the user to update
-     * @param model  The model to add attributes for the view
-     * @return The view name for the update user page
-     */
     @GetMapping("/admin/users/update/{userId}")
-    public String showUpdateUserForm(@PathVariable int userId, Model model, HttpSession session) {
+    public String showUpdateUserForm(@PathVariable int userId, Model model, HttpSession session,
+            HttpServletRequest request) throws IOException {
+        checkAndProcess(request, session);
         processGetInternal(session);
         User user = userService.findByUsername(userService.findAllUsers().stream()
                 .filter(u -> u.getUserId() == userId)
@@ -138,28 +87,18 @@ public class AuthController extends BaseRBACController {
         return "update-user";
     }
 
-    /**
-     * Updates a specific user.
-     *
-     * @param user         The updated user information
-     * @param roleId       The role ID to assign
-     * @param departmentId The department ID to assign
-     * @param managerId    The manager ID to assign
-     * @param session      The HTTP session to manage user context
-     * @return The redirect URL to the admin users page
-     */
     @PostMapping("/admin/users/update")
     public String updateUser(@ModelAttribute User user,
             @RequestParam("roleId") Integer roleId,
             @RequestParam("departmentId") Integer departmentId,
             @RequestParam("managerId") Integer managerId,
-            HttpSession session) {
+            HttpSession session, HttpServletRequest request) throws IOException {
+        checkAndProcess(request, session);
         processPostInternal(session);
         User existingUser = userService.findByUsername(user.getUsername());
         if (existingUser == null || "admin".equalsIgnoreCase(existingUser.getUsername())) {
             return "redirect:/admin/users";
         }
-
         existingUser.setFullName(user.getFullName());
         existingUser.setEmail(user.getEmail());
         existingUser.setDepartmentId(departmentId);
@@ -168,17 +107,20 @@ public class AuthController extends BaseRBACController {
         return "redirect:/admin/users";
     }
 
-    /**
-     * Deletes a specific user.
-     *
-     * @param userId The ID of the user to delete
-     * @return The redirect URL to the admin users page
-     */
     @GetMapping("/admin/users/delete/{userId}")
-    public String deleteUser(@PathVariable int userId, HttpSession session) {
+    public String deleteUser(@PathVariable int userId, HttpSession session, HttpServletRequest request)
+            throws IOException {
+        checkAndProcess(request, session);
         processGetInternal(session);
         userService.deleteUserById(userId);
         return "redirect:/admin/users";
     }
 
+    @Override
+    protected void processGetInternal(HttpSession session, Object... args) {
+    }
+
+    @Override
+    protected void processPostInternal(HttpSession session, Object... args) {
+    }
 }
