@@ -45,33 +45,13 @@
                             <!-- Navigation options -->
                             <div class="card-body p-0">
                                 <div class="list-group list-group-flush">
-                                    <c:if test="${canCreateRequest}">
-                                        <a href="${pageContext.request.contextPath}/request/create"
+                                    <c:forEach var="feature" items="${features}">
+                                        <a href="${pageContext.request.contextPath}${feature.entrypoint}"
                                             class="list-group-item list-group-item-action">
-                                            <i class="fa-regular fa-square-plus"></i> Create Leave Request
+                                            <i class="fa-solid fa-arrow-right me-2"></i>
+                                            ${feature.featureName}
                                         </a>
-                                    </c:if>
-
-                                    <c:if test="${canViewSubordinates}">
-                                        <a href="${pageContext.request.contextPath}/request/view-subordinates"
-                                            class="list-group-item list-group-item-action">
-                                            <i class="fa-solid fa-users-line"></i> View Subordinate Requests
-                                        </a>
-                                    </c:if>
-
-                                    <c:if test="${canViewAgenda}">
-                                        <a href="${pageContext.request.contextPath}/agenda"
-                                            class="list-group-item list-group-item-action">
-                                            <i class="fa-regular fa-calendar-check"></i> View Agenda
-                                        </a>
-                                    </c:if>
-
-                                    <c:if test="${canManageUsers}">
-                                        <a href="${pageContext.request.contextPath}/admin/users"
-                                            class="list-group-item list-group-item-action">
-                                            <i class="fa-solid fa-user-gear"></i> Manage Users
-                                        </a>
-                                    </c:if>
+                                    </c:forEach>
                                 </div>
 
                                 <!-- Logout Button -->

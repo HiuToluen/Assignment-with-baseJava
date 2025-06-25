@@ -3,12 +3,13 @@ package com.hiutoluen.leave_management.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -25,8 +26,8 @@ public class Feature {
     @Column(name = "entrypoint")
     private String entrypoint;
 
-    @ManyToMany(mappedBy = "features")
-    private Set<Role> roles = new HashSet<>();
+    @OneToMany(mappedBy = "feature", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RoleFeature> roleFeatures = new HashSet<>();
 
     // Default constructor
     public Feature() {
@@ -57,11 +58,20 @@ public class Feature {
         this.entrypoint = entrypoint;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    public Set<RoleFeature> getRoleFeatures() {
+        return roleFeatures;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setRoleFeatures(Set<RoleFeature> roleFeatures) {
+        this.roleFeatures = roleFeatures;
+    }
+
+    public Set<Role> getRoles() {
+        Set<Role> roles = new HashSet<>();
+        for (RoleFeature rf : roleFeatures) {
+            if (rf.getRole() != null)
+                roles.add(rf.getRole());
+        }
+        return roles;
     }
 }

@@ -1,10 +1,12 @@
 :root {
   --bs-blue: #0d6efd;
-  --primary-light: #4e9bff;
+  --primary-light: #7ed6fb;
+  --primary-mid: #48c6ef;
   --gray-bg: #eef3f8;
   --header-gradient: linear-gradient(
     135deg,
     var(--bs-blue),
+    var(--primary-mid),
     var(--primary-light)
   );
 }
@@ -131,6 +133,24 @@ body {
   transform: translateY(-2px);
 }
 
+/* ===== Custom Button Style ===== */
+.btn-custom {
+  background: var(--header-gradient);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.08);
+}
+.btn-custom:hover,
+.btn-custom:focus {
+  background: linear-gradient(135deg, #48c6ef, #7ed6fb);
+  color: #fff;
+  transform: translateY(-2px) scale(1.03);
+}
+
 /* ===== Invalid Feedback ===== */
 .invalid-feedback {
   display: block;
@@ -140,7 +160,7 @@ body {
 
 /* ===== Login Body Styles ===== */
 .login-body {
-  background: linear-gradient(135deg, var(--bs-blue), var(--primary-light));
+  background: var(--header-gradient);
   height: 100vh;
   display: flex;
   justify-content: center;

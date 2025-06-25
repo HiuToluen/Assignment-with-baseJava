@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.hiutoluen.leave_management.model.User;
 import com.hiutoluen.leave_management.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -14,7 +15,9 @@ import jakarta.servlet.http.HttpSession;
  */
 @Controller
 @RequestMapping("/agenda")
-public class AgendaController extends BaseRBACController {
+public class AgendaController {
+
+    private final UserService userService;
 
     /**
      * Constructs a new AgendaController with the required dependency.
@@ -22,7 +25,7 @@ public class AgendaController extends BaseRBACController {
      * @param userService The service to handle user-related business logic
      */
     public AgendaController(UserService userService) {
-        super(userService);
+        this.userService = userService;
     }
 
     /**
@@ -34,15 +37,17 @@ public class AgendaController extends BaseRBACController {
      */
     @GetMapping
     public String agendaPage(Model model, HttpSession session) {
-        model.addAttribute("user", getCurrentUser(session));
+        // Kiểm tra đăng nhập
+        Object currentUserObj = session.getAttribute("currentUser");
+        if (currentUserObj == null) {
+            throw new SecurityException("You have not yet authenticated");
+        }
+        User user = (User) currentUserObj;
+        // Kiểm tra phân quyền
+        if (!userService.hasPermission(user.getUsername(), "/agenda")) {
+            throw new SecurityException("You do not have permission to access this feature");
+        }
+        model.addAttribute("user", user);
         return "agenda";
-    }
-
-    @Override
-    protected void processGetInternal(HttpSession session, Object... args) {
-    }
-
-    @Override
-    protected void processPostInternal(HttpSession session, Object... args) {
     }
 }

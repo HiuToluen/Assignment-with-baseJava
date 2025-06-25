@@ -1,12 +1,15 @@
 package com.hiutoluen.leave_management.service;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hiutoluen.leave_management.model.Feature;
 import com.hiutoluen.leave_management.model.Role;
 import com.hiutoluen.leave_management.model.User;
 import com.hiutoluen.leave_management.model.UserRole;
@@ -49,8 +52,6 @@ public class UserService {
         String fixedSalt = "$2a$12$abcdefghijklmnopqrstuv";
         user.setPassword(BCrypt.hashpw(user.getPassword(), fixedSalt));
         User savedUser = userRepository.save(user);
-
-        // Gán vai trò mặc định (ví dụ: Employee, ID 1)
         Role role = roleRepository.findById(1).orElseThrow(() -> new RuntimeException("Role not found"));
         UserRole userRole = new UserRole();
         userRole.setUser(savedUser);
@@ -58,7 +59,6 @@ public class UserService {
         userRole.setAssignedBy(1);
         userRole.setAssignedAt(new Date());
         userRoleRepository.save(userRole);
-
         return savedUser;
     }
 
@@ -66,16 +66,28 @@ public class UserService {
         User user = findByUsername(username);
         if (user == null)
             return false;
-
-        // Kiểm tra nếu là admin
         if ("admin".equalsIgnoreCase(user.getUsername())) {
             return true;
         }
+        if (user.getUserRoles() == null || user.getUserRoles().isEmpty()) {
+            List<UserRole> roles = userRoleRepository.findByUser_UserId(user.getUserId());
+            if (roles != null && !roles.isEmpty()) {
+                user.setUserRoles(new HashSet<>(roles));
+            }
+        }
 
-        // Kiểm tra quyền dựa trên vai trò
-        return user.getUserRoles().stream()
+        List<UserRole> userRolesWithFeatures = entityManager.createQuery(
+                "SELECT ur FROM UserRole ur " +
+                        "JOIN FETCH ur.role r " +
+                        "LEFT JOIN FETCH r.features f " +
+                        "WHERE ur.user = :user",
+                UserRole.class)
+                .setParameter("user", user)
+                .getResultList();
+
+        return userRolesWithFeatures.stream()
                 .flatMap(ur -> ur.getRole().getFeatures().stream())
-                .anyMatch(feature -> feature.getFeatureName().equals(featureName));
+                .anyMatch(feature -> feature.getEntrypoint() != null && feature.getEntrypoint().equals(featureName));
     }
 
     public List<User> findAllUsers() {
@@ -131,7 +143,6 @@ public class UserService {
         if ("admin".equalsIgnoreCase(existingUser.getUsername())) {
             throw new IllegalArgumentException("Cannot update admin user.");
         }
-
         updateUserInformation(existingUser, user);
         deleteExistingRoles(existingUser.getUserId());
         assignNewRole(existingUser, roleId, 1);
@@ -147,23 +158,56 @@ public class UserService {
     @Transactional
     public void saveUserUpdates(List<User> users, List<Integer> roleIds, int adminId) {
         validateInputLists(users, roleIds);
-
         if (users != null) {
             for (int i = 0; i < users.size(); i++) {
                 User user = users.get(i);
                 if (user.getUserId() == 0 || user == null)
                     continue;
-
                 User existingUser = userRepository.findById(user.getUserId())
                         .orElseThrow(() -> new RuntimeException("User not found with ID: " + user.getUserId()));
                 if ("admin".equalsIgnoreCase(existingUser.getUsername())) {
                     continue;
                 }
-
                 updateUserInformation(existingUser, user);
                 deleteExistingRoles(existingUser.getUserId());
                 assignNewRole(existingUser, roleIds != null ? roleIds.get(i) : null, adminId);
             }
         }
+    }
+
+    /**
+     * Lấy danh sách feature (menu) động mà user được phép truy cập
+     */
+    public Set<Feature> getFeaturesForUser(User user) {
+        Set<Feature> features = new HashSet<>();
+        if (user == null)
+            return features;
+        if ("admin".equalsIgnoreCase(user.getUsername())) {
+            // Nếu là admin, lấy tất cả features
+            for (Role role : roleRepository.findAll()) {
+                features.addAll(role.getFeatures());
+            }
+            return features;
+        }
+        if (user.getUserRoles() == null || user.getUserRoles().isEmpty()) {
+            List<UserRole> roles = userRoleRepository.findByUser_UserId(user.getUserId());
+            if (roles != null && !roles.isEmpty()) {
+                user.setUserRoles(new HashSet<>(roles));
+            }
+        }
+        for (UserRole ur : user.getUserRoles()) {
+            features.addAll(ur.getRole().getFeatures());
+        }
+        return features;
+    }
+
+    public List<User> searchUsers(String username, String fullName, String email, Integer departmentId,
+            Integer roleId) {
+        return userRepository.searchUsers(
+                (username == null || username.isBlank()) ? null : username,
+                (fullName == null || fullName.isBlank()) ? null : fullName,
+                (email == null || email.isBlank()) ? null : email,
+                departmentId,
+                roleId);
     }
 }

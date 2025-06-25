@@ -112,8 +112,8 @@ public class AuthPublicController {
                 return "register";
             }
             User registeredUser = userService.registerUser(user);
-            session.setAttribute("currentUser", registeredUser); // Kiểm tra
-            System.out.println("Registered user: " + registeredUser.getUsername());
+            session.setAttribute("currentUser", registeredUser);
+            System.out.println("Registered user: " + registeredUser.getUsername() + ", Session ID: " + session.getId());
             return "redirect:/login";
         } catch (Exception e) {
             model.addAttribute("departments", departmentRepository.findAll());
@@ -161,8 +161,12 @@ public class AuthPublicController {
             String name = userInfo.get("name").getAsString();
             User existingUser = userService.findByEmail(email);
             if (existingUser != null) {
-                session.setAttribute("currentUser", existingUser); // Kiểm tra
-                System.out.println("Google login user: " + existingUser.getUsername());
+                session.setAttribute("currentUser", existingUser);
+                System.out.println(
+                        "Google login user: " + existingUser.getUsername() + ", Session ID: " + session.getId());
+                if ("admin".equalsIgnoreCase(existingUser.getUsername())) {
+                    return "redirect:/admin/users";
+                }
                 return "redirect:/home";
             }
             User newUser = new User();
@@ -173,8 +177,12 @@ public class AuthPublicController {
             String fixedSalt = "$2a$12$abcdefghijklmnopqrstuv";
             newUser.setPassword(BCrypt.hashpw("google" + System.currentTimeMillis(), fixedSalt));
             User savedUser = userService.registerUser(newUser);
-            session.setAttribute("currentUser", savedUser); // Kiểm tra
-            System.out.println("New Google user registered: " + savedUser.getUsername());
+            session.setAttribute("currentUser", savedUser);
+            System.out.println(
+                    "New Google user registered: " + savedUser.getUsername() + ", Session ID: " + session.getId());
+            if ("admin".equalsIgnoreCase(savedUser.getUsername())) {
+                return "redirect:/admin/users";
+            }
             return "redirect:/home";
         } catch (Exception e) {
             e.printStackTrace();

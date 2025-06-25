@@ -1,8 +1,17 @@
 package com.hiutoluen.leave_management.model;
 
-import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Roles")
@@ -18,9 +27,8 @@ public class Role {
     @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
     private Set<UserRole> userRoles = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "Role_Features", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "feature_id"))
-    private Set<Feature> features = new HashSet<>();
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RoleFeature> roleFeatures = new HashSet<>();
 
     // Default constructor
     public Role() {
@@ -51,11 +59,20 @@ public class Role {
         this.userRoles = userRoles;
     }
 
-    public Set<Feature> getFeatures() {
-        return features;
+    public Set<RoleFeature> getRoleFeatures() {
+        return roleFeatures;
     }
 
-    public void setFeatures(Set<Feature> features) {
-        this.features = features;
+    public void setRoleFeatures(Set<RoleFeature> roleFeatures) {
+        this.roleFeatures = roleFeatures;
+    }
+
+    public Set<Feature> getFeatures() {
+        Set<Feature> features = new HashSet<>();
+        for (RoleFeature rf : roleFeatures) {
+            if (rf.getFeature() != null)
+                features.add(rf.getFeature());
+        }
+        return features;
     }
 }
