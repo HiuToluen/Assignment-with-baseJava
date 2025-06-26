@@ -34,12 +34,12 @@ public class WebConfig implements WebMvcConfigurer {
                                 .addPathPatterns("/**")
                                 .excludePathPatterns(
                                                 "/", "/login", "/register", "/oauth2/google", "/oauth2/callback",
-                                                "/css/**", "/js/**", "/images/**", "/webjars/**");
+                                                "/error/**", "/css/**", "/js/**", "/images/**", "/webjars/**");
 
                 registry.addInterceptor(authorizationInterceptor())
                                 .addPathPatterns("/**")
                                 .excludePathPatterns(
                                                 "/", "/login", "/register", "/oauth2/google", "/oauth2/callback",
-                                                "/css/**", "/js/**", "/images/**", "/webjars/**");
+                                                "/error/**", "/css/**", "/js/**", "/images/**", "/webjars/**");
         }
 }

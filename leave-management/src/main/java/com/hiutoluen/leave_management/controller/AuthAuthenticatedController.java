@@ -33,18 +33,41 @@ public class AuthAuthenticatedController {
             model.addAttribute("errorMessage", "You have not yet authenticated");
             return "error/403";
         }
-        model.addAttribute("user", user);
-        List<Department> departments = departmentRepository.findAll();
-        if (departments == null) {
-            departments = List.of();
+
+        try {
+            // Refresh user data with validated manager
+            User refreshedUser = userService.findByUsernameWithValidatedManager(user.getUsername());
+            if (refreshedUser != null) {
+                user = refreshedUser;
+                session.setAttribute("currentUser", user);
+            }
+
+            model.addAttribute("user", user);
+            List<Department> departments = departmentRepository.findAll();
+            if (departments == null) {
+                departments = List.of();
+            }
+
+            Map<Integer, String> managerNames = new HashMap<>();
+            List<User> allUsers = userService.findAllUsers();
+            for (User u : allUsers) {
+                managerNames.put(u.getUserId(), u.getFullName());
+            }
+
+            model.addAttribute("departments", departments);
+            model.addAttribute("managerNames", managerNames);
+
+            // Try to get features, but don't fail if there's an error
+            try {
+                model.addAttribute("features", userService.getFeaturesForUser(user));
+            } catch (Exception e) {
+                model.addAttribute("features", List.of());
+            }
+
+            return "home";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "An error occurred while loading the page: " + e.getMessage());
+            return "error/403";
         }
-        Map<Integer, String> managerNames = new HashMap<>();
-        for (User u : userService.findAllUsers()) {
-            managerNames.put(u.getUserId(), u.getFullName());
-        }
-        model.addAttribute("departments", departments);
-        model.addAttribute("managerNames", managerNames);
-        model.addAttribute("features", userService.getFeaturesForUser(user));
-        return "home";
     }
 }

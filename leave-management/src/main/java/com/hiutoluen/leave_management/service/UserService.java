@@ -9,10 +9,12 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hiutoluen.leave_management.model.Department;
 import com.hiutoluen.leave_management.model.Feature;
 import com.hiutoluen.leave_management.model.Role;
 import com.hiutoluen.leave_management.model.User;
 import com.hiutoluen.leave_management.model.UserRole;
+import com.hiutoluen.leave_management.repository.DepartmentRepository;
 import com.hiutoluen.leave_management.repository.RoleRepository;
 import com.hiutoluen.leave_management.repository.UserRepository;
 import com.hiutoluen.leave_management.repository.UserRoleRepository;
@@ -25,23 +27,36 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final ManagerService managerService;
+    private final DepartmentRepository departmentRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository,
-            UserRoleRepository userRoleRepository) {
+            UserRoleRepository userRoleRepository, ManagerService managerService,
+            DepartmentRepository departmentRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
+        this.managerService = managerService;
+        this.departmentRepository = departmentRepository;
     }
 
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username);
+        if (user != null && !"admin".equalsIgnoreCase(user.getUsername())) {
+            managerService.determineAndSetManager(user);
+        }
+        return user;
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+        if (user != null && !"admin".equalsIgnoreCase(user.getUsername())) {
+            managerService.determineAndSetManager(user);
+        }
+        return user;
     }
 
     @Transactional
@@ -59,6 +74,9 @@ public class UserService {
         userRole.setAssignedBy(1);
         userRole.setAssignedAt(new Date());
         userRoleRepository.save(userRole);
+
+        managerService.determineAndSetManager(savedUser);
+
         return savedUser;
     }
 
@@ -79,7 +97,8 @@ public class UserService {
         List<UserRole> userRolesWithFeatures = entityManager.createQuery(
                 "SELECT ur FROM UserRole ur " +
                         "JOIN FETCH ur.role r " +
-                        "LEFT JOIN FETCH r.features f " +
+                        "LEFT JOIN FETCH r.roleFeatures rf " +
+                        "LEFT JOIN FETCH rf.feature " +
                         "WHERE ur.user = :user",
                 UserRole.class)
                 .setParameter("user", user)
@@ -91,7 +110,13 @@ public class UserService {
     }
 
     public List<User> findAllUsers() {
-        return userRepository.findAll();
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            if (!"admin".equalsIgnoreCase(user.getUsername())) {
+                managerService.determineAndSetManager(user);
+            }
+        }
+        return users;
     }
 
     public void validateInputLists(List<User> users, List<Integer> roleIds) {
@@ -143,9 +168,42 @@ public class UserService {
         if ("admin".equalsIgnoreCase(existingUser.getUsername())) {
             throw new IllegalArgumentException("Cannot update admin user.");
         }
+
+        int oldDepartmentId = existingUser.getDepartmentId();
+        List<UserRole> oldUserRoles = userRoleRepository.findByUser_UserId(existingUser.getUserId());
+        Integer oldRoleId = oldUserRoles.isEmpty() ? null : oldUserRoles.get(0).getRole().getRoleId();
+
         updateUserInformation(existingUser, user);
         deleteExistingRoles(existingUser.getUserId());
         assignNewRole(existingUser, roleId, 1);
+
+        if (roleId != null && !roleId.equals(oldRoleId)) {
+            if (roleId == 3) {
+                managerService.updateDepartmentManager(existingUser, user.getDepartmentId());
+            } else if (oldRoleId != null && oldRoleId == 3) {
+                Department oldDept = departmentRepository.findById(oldDepartmentId).orElse(null);
+                if (oldDept != null && oldDept.getIdManager() != null &&
+                        oldDept.getIdManager() == existingUser.getUserId()) {
+                    oldDept.setIdManager(null);
+                    departmentRepository.save(oldDept);
+                }
+            }
+            managerService.handleRoleChange(existingUser, roleId);
+        } else if (user.getDepartmentId() != oldDepartmentId) {
+            if (oldRoleId != null && oldRoleId == 3) {
+                Department oldDept = departmentRepository.findById(oldDepartmentId).orElse(null);
+                if (oldDept != null && oldDept.getIdManager() != null &&
+                        oldDept.getIdManager() == existingUser.getUserId()) {
+                    oldDept.setIdManager(null);
+                    departmentRepository.save(oldDept);
+                }
+            }
+            if (roleId != null && roleId == 3) {
+                managerService.updateDepartmentManager(existingUser, user.getDepartmentId());
+            }
+            managerService.determineAndSetManager(existingUser);
+        }
+
         return existingUser;
     }
 
@@ -178,24 +236,35 @@ public class UserService {
     /**
      * Lấy danh sách feature (menu) động mà user được phép truy cập
      */
+    @Transactional
     public Set<Feature> getFeaturesForUser(User user) {
         Set<Feature> features = new HashSet<>();
         if (user == null)
             return features;
         if ("admin".equalsIgnoreCase(user.getUsername())) {
-            // Nếu là admin, lấy tất cả features
-            for (Role role : roleRepository.findAll()) {
+            List<Role> allRoles = entityManager.createQuery(
+                    "SELECT r FROM Role r " +
+                            "LEFT JOIN FETCH r.roleFeatures rf " +
+                            "LEFT JOIN FETCH rf.feature",
+                    Role.class)
+                    .getResultList();
+            for (Role role : allRoles) {
                 features.addAll(role.getFeatures());
             }
             return features;
         }
-        if (user.getUserRoles() == null || user.getUserRoles().isEmpty()) {
-            List<UserRole> roles = userRoleRepository.findByUser_UserId(user.getUserId());
-            if (roles != null && !roles.isEmpty()) {
-                user.setUserRoles(new HashSet<>(roles));
-            }
-        }
-        for (UserRole ur : user.getUserRoles()) {
+
+        List<UserRole> userRolesWithFeatures = entityManager.createQuery(
+                "SELECT ur FROM UserRole ur " +
+                        "JOIN FETCH ur.role r " +
+                        "LEFT JOIN FETCH r.roleFeatures rf " +
+                        "LEFT JOIN FETCH rf.feature " +
+                        "WHERE ur.user = :user",
+                UserRole.class)
+                .setParameter("user", user)
+                .getResultList();
+
+        for (UserRole ur : userRolesWithFeatures) {
             features.addAll(ur.getRole().getFeatures());
         }
         return features;
@@ -203,11 +272,51 @@ public class UserService {
 
     public List<User> searchUsers(String username, String fullName, String email, Integer departmentId,
             Integer roleId) {
-        return userRepository.searchUsers(
+        List<User> users = userRepository.searchUsers(
                 (username == null || username.isBlank()) ? null : username,
                 (fullName == null || fullName.isBlank()) ? null : fullName,
                 (email == null || email.isBlank()) ? null : email,
                 departmentId,
                 roleId);
+
+        for (User user : users) {
+            if (!"admin".equalsIgnoreCase(user.getUsername())) {
+                managerService.determineAndSetManager(user);
+            }
+        }
+        return users;
+    }
+
+    /**
+     * Validate and update manager assignments for all users
+     * This method should be called when loading data or periodically
+     */
+    @Transactional
+    public void validateManagerAssignments() {
+        managerService.validateAndUpdateAllManagers();
+    }
+
+    /**
+     * Get user with validated manager assignment
+     *
+     * @param username The username to find
+     * @return User with validated manager
+     */
+    public User findByUsernameWithValidatedManager(String username) {
+        User user = findByUsername(username);
+        if (user != null && !"admin".equalsIgnoreCase(user.getUsername())) {
+            managerService.determineAndSetManager(user);
+        }
+        return user;
+    }
+
+    @Transactional
+    public void refreshAllManagerAssignments() {
+        List<User> allUsers = userRepository.findAll();
+        for (User user : allUsers) {
+            if (!"admin".equalsIgnoreCase(user.getUsername())) {
+                managerService.determineAndSetManager(user);
+            }
+        }
     }
 }

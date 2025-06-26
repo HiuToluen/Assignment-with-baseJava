@@ -2,7 +2,6 @@ package com.hiutoluen.leave_management.model;
 
 import java.io.Serializable;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,15 +15,6 @@ import jakarta.persistence.Table;
 public class RoleFeature implements Serializable {
     @EmbeddedId
     private RoleFeatureId id;
-
-    @Column(name = "permission_type")
-    private String permissionType;
-
-    @Column(name = "is_active")
-    private Boolean isActive = true;
-
-    @Column(name = "description")
-    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("roleId")
@@ -43,30 +33,6 @@ public class RoleFeature implements Serializable {
 
     public void setId(RoleFeatureId id) {
         this.id = id;
-    }
-
-    public String getPermissionType() {
-        return permissionType;
-    }
-
-    public void setPermissionType(String permissionType) {
-        this.permissionType = permissionType;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Role getRole() {

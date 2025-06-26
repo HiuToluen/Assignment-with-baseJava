@@ -184,10 +184,20 @@
                                     <a href="${pageContext.request.contextPath}/home" class="btn btn-secondary">
                                         <i class="fa-solid fa-house"></i> Back to Home
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger"
-                                        onclick="return confirm('Are you sure?')">
-                                        <i class="fa-solid fa-right-from-bracket"></i> Logout
-                                    </a>
+                                    <div>
+                                        <a href="${pageContext.request.contextPath}/admin/features"
+                                            class="btn btn-info me-2">
+                                            <i class="fa-solid fa-cogs"></i> Manage Features
+                                        </a>
+                                        <a href="${pageContext.request.contextPath}/admin/permissions"
+                                            class="btn btn-warning me-2">
+                                            <i class="fa-solid fa-key"></i> Manage Permissions
+                                        </a>
+                                        <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger"
+                                            onclick="return confirm('Are you sure?')">
+                                            <i class="fa-solid fa-right-from-bracket"></i> Logout
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
