@@ -1,12 +1,16 @@
 package com.hiutoluen.leave_management.model;
 
-import java.util.Date;
+import java.sql.Date;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -23,11 +27,9 @@ public class LeaveRequest {
     private int userId;
 
     @Column(name = "start_date", nullable = false)
-    @Temporal(TemporalType.DATE)
     private Date startDate;
 
     @Column(name = "end_date", nullable = false)
-    @Temporal(TemporalType.DATE)
     private Date endDate;
 
     @Column(name = "reason")
@@ -44,11 +46,14 @@ public class LeaveRequest {
 
     @Column(name = "created_at", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private java.util.Date createdAt;
 
     @Column(name = "updated_at", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    private java.util.Date updatedAt;
+
+    @Column(name = "title", nullable = false)
+    private String title;
 
     // Default constructor
     public LeaveRequest() {
@@ -119,19 +124,39 @@ public class LeaveRequest {
         this.processedReason = processedReason;
     }
 
-    public Date getCreatedAt() {
+    public java.util.Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(java.util.Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public java.util.Date getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(java.util.Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        java.util.Date now = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh")).getTime();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh")).getTime();
     }
 }

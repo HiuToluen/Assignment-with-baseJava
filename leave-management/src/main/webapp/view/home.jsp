@@ -1,75 +1,176 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-        <!DOCTYPE html>
-        <html lang="en">
+        <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+            <!DOCTYPE html>
+            <html lang="en">
 
-        <head>
-            <meta charset="UTF-8">
-            <title>Home · Leave Management</title>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Home · Leave Management</title>
 
-            <!-- Bootstrap CSS -->
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                <!-- Bootstrap CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-            <!-- Font Awesome for icons -->
-            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+                <!-- Font Awesome for icons -->
+                <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-            <!-- Custom CSS -->
-            <link rel="stylesheet" href="/css/style.css" />
-        </head>
+                <!-- Custom CSS -->
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home/styles.css" />
+            </head>
 
-        <body>
+            <body>
+                <!-- ======= Navbar ======= -->
+                <nav class="navbar navbar-expand-lg">
+                    <div class="container">
+                        <a class="navbar-brand d-flex align-items-center" href="#">
+                            <i class="fa-solid fa-plane-departure me-2"></i> Leave Management
+                        </a>
 
-            <!-- ======= Navbar ======= -->
-            <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-                <div class="container">
-                    <a class="navbar-brand d-flex align-items-center" href="#">
-                        <i class="fa-solid fa-plane-departure me-2"></i> Leave Management
-                    </a>
-                    <span class="navbar-text ms-auto text-white">
-                        Welcome, <strong>${currentUser.fullName}</strong>
-                    </span>
-                </div>
-            </nav>
-
-            <!-- ======= Main Content ======= -->
-            <div class="container py-5">
-                <div class="row justify-content-center">
-                    <div class="col-lg-6 col-md-8">
-                        <div class="card shadow-sm">
-                            <!-- Header with gradient -->
-                            <div class="card-header text-center header-gradient">
-                                <h3 class="mb-1">Welcome, ${currentUser.fullName}</h3>
-                                <p class="small">What would you like to do?</p>
+                        <div class="user-info ms-auto">
+                            <div class="user-avatar">
+                                <c:out value="${currentUser.fullName.charAt(0)}" />
                             </div>
-
-                            <!-- Navigation options -->
-                            <div class="card-body p-0">
-                                <div class="list-group list-group-flush">
-                                    <c:forEach var="feature" items="${features}">
-                                        <a href="${pageContext.request.contextPath}${feature.entrypoint}"
-                                            class="list-group-item list-group-item-action">
-                                            <i class="fa-solid fa-arrow-right me-2"></i>
-                                            ${feature.featureName}
-                                        </a>
-                                    </c:forEach>
-                                </div>
-
-                                <!-- Logout Button -->
-                                <div class="text-center py-4 border-top">
-                                    <a href="${pageContext.request.contextPath}/logout"
-                                        class="btn btn-outline-danger px-4"
-                                        onclick="return confirm('Are you sure you want to logout?');">
-                                        <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
-                                    </a>
-                                </div>
-                            </div>
+                            <span class="user-name d-none d-md-block">
+                                Welcome, <strong>
+                                    <c:out value="${currentUser.fullName}" />
+                                </strong>
+                            </span>
                         </div>
                     </div>
+                </nav>
+
+                <!-- ======= Main Content ======= -->
+                <div class="container main-container">
+                    <!-- Welcome Section -->
+                    <div class="welcome-section fade-in">
+                        <div class="welcome-icon">
+                            <i class="fa-solid fa-home"></i>
+                        </div>
+                        <h1 class="welcome-title">Welcome Back!</h1>
+                        <p class="welcome-subtitle">Choose an action to get started with your leave management</p>
+                    </div>
+
+                    <!-- Features Grid -->
+                    <div class="features-grid slide-up">
+                        <c:forEach var="feature" items="${features}">
+                            <c:if test="${!fn:contains(feature.entrypoint, '/detail')}">
+                                <c:set var="entrypoint" value="${feature.entrypoint}" />
+                                <c:choose>
+                                    <c:when test="${entrypoint == '/request/create'}">
+                                        <c:set var="entrypoint" value="/feature/request/create" />
+                                    </c:when>
+                                    <c:when test="${entrypoint == '/request/view-subordinates'}">
+                                        <c:set var="entrypoint" value="/feature/request/view-subordinates" />
+                                    </c:when>
+                                    <c:when test="${entrypoint == '/agenda'}">
+                                        <c:set var="entrypoint" value="/feature/agenda" />
+                                    </c:when>
+                                    <c:when test="${entrypoint == '/request/mylr'}">
+                                        <c:set var="entrypoint" value="/feature/request/mylr" />
+                                    </c:when>
+                                </c:choose>
+                                <a href="${pageContext.request.contextPath}${entrypoint}" class="feature-card">
+                                    <div class="feature-icon">
+                                        <c:choose>
+                                            <c:when test="${fn:contains(feature.featureName, 'Request')}">
+                                                <i class="fa-solid fa-file-circle-plus"></i>
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'View')}">
+                                                <i class="fa-solid fa-list-check"></i>
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'Profile')}">
+                                                <i class="fa-solid fa-user-circle"></i>
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'Admin')}">
+                                                <i class="fa-solid fa-shield-halved"></i>
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'User')}">
+                                                <i class="fa-solid fa-users"></i>
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'Feature')}">
+                                                <i class="fa-solid fa-gear"></i>
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'Permission')}">
+                                                <i class="fa-solid fa-key"></i>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <i class="fa-solid fa-arrow-right"></i>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                    <h3 class="feature-title">
+                                        <c:out value="${feature.featureName}" />
+                                    </h3>
+                                    <p class="feature-description">
+                                        <c:choose>
+                                            <c:when test="${fn:contains(feature.featureName, 'Request')}">
+                                                Submit a new leave request for approval
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'View')}">
+                                                View and manage your existing leave requests
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'Profile')}">
+                                                Update your personal information and settings
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'Admin')}">
+                                                Access administrative functions and controls
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'User')}">
+                                                Manage user accounts and permissions
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'Feature')}">
+                                                Configure system features and modules
+                                            </c:when>
+                                            <c:when test="${fn:contains(feature.featureName, 'Permission')}">
+                                                Set up role-based access controls
+                                            </c:when>
+                                            <c:otherwise>
+                                                Access this feature to manage your workflow
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </p>
+                                </a>
+                            </c:if>
+                        </c:forEach>
+                    </div>
+
+                    <!-- Logout Section (move to bottom) -->
+                    <div class="logout-section mt-auto" style="margin-top: auto;">
+                        <a href="${pageContext.request.contextPath}/logout" class="logout-btn"
+                            onclick="return confirm('Are you sure you want to logout?');">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+                        </a>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Bootstrap Bundle JS -->
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        </body>
+                <!-- Bootstrap Bundle JS -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        </html>
+                <!-- Custom JavaScript for animations -->
+                <script>
+                    // Add loading animation to logout button
+                    document.querySelector('.logout-btn').addEventListener('click', function (e) {
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<span class="loading-spinner me-2"></span>Logging out...';
+                        this.disabled = true;
+
+                        // Reset after 2 seconds if user cancels
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.disabled = false;
+                        }, 2000);
+                    });
+
+                    // Add staggered animation to feature cards
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const cards = document.querySelectorAll('.feature-card');
+                        cards.forEach((card, index) => {
+                            card.style.animationDelay = `${index * 0.1}s`;
+                            card.classList.add('slide-up');
+                        });
+                    });
+                </script>
+            </body>
+
+            </html>

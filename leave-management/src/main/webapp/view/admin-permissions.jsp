@@ -194,15 +194,17 @@
                 <div class="row mt-4">
                     <div class="col-12">
                         <div class="card permission-matrix admin-card">
-                            <div class="card-header bg-primary text-white">
+                            <div class="card-header"
+                                style="background: linear-gradient(90deg, #4e73df 0%, #36b9cc 100%); color: #fff;">
                                 <h5 class="mb-0">
                                     <i class="fa-solid fa-table me-2"></i>Permission Matrix
                                 </h5>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered mb-0">
-                                        <thead class="table-primary">
+                                    <table class="table table-bordered mb-0" style="background: #f8fafd;">
+                                        <thead
+                                            style="background: linear-gradient(90deg, #6ea8fe 0%, #a7c7e7 100%); color: #222;">
                                             <tr>
                                                 <th class="text-center">Role</th>
                                                 <c:forEach var="feature" items="${features}">
@@ -213,9 +215,10 @@
                                         <tbody>
                                             <c:forEach var="role" items="${roles}">
                                                 <tr>
-                                                    <td class="fw-bold text-center">${role.roleName}</td>
+                                                    <td class="fw-bold text-center"
+                                                        style="background: #eaf1fb; color: #222;">${role.roleName}</td>
                                                     <c:forEach var="feature" items="${features}">
-                                                        <td class="text-center">
+                                                        <td class="text-center" style="background: #fff;">
                                                             <c:set var="hasPermission" value="false" />
                                                             <c:forEach var="roleFeature" items="${roleFeatures}">
                                                                 <c:if
@@ -225,10 +228,12 @@
                                                             </c:forEach>
                                                             <c:choose>
                                                                 <c:when test="${hasPermission}">
-                                                                    <span class="badge badge-success">✓</span>
+                                                                    <span class="badge bg-success"
+                                                                        style="font-size:1.1rem;">&#10003;</span>
                                                                 </c:when>
                                                                 <c:otherwise>
-                                                                    <span class="badge badge-secondary">✗</span>
+                                                                    <span class="badge bg-light text-secondary"
+                                                                        style="font-size:1.1rem;">&#10007;</span>
                                                                 </c:otherwise>
                                                             </c:choose>
                                                         </td>

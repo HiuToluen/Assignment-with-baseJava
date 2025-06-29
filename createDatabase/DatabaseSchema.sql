@@ -1,3 +1,4 @@
+
 -- Create database
 CREATE DATABASE LeaveManagement;
 GO
@@ -63,7 +64,8 @@ CREATE TABLE Leave_Requests (
     processed_by INT,
     processed_reason NVARCHAR(500),
     created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE()
+    updated_at DATETIME DEFAULT GETDATE(),
+    title NVARCHAR(255) NOT NULL DEFAULT ''
 );
 
 -- Create Agenda table

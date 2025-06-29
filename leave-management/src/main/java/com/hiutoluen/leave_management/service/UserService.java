@@ -106,7 +106,13 @@ public class UserService {
 
         return userRolesWithFeatures.stream()
                 .flatMap(ur -> ur.getRole().getFeatures().stream())
-                .anyMatch(feature -> feature.getEntrypoint() != null && feature.getEntrypoint().equals(featureName));
+                .anyMatch(feature -> {
+                    String entry = feature.getEntrypoint();
+                    if (entry != null && !entry.startsWith("/feature/") && !entry.startsWith("/admin/")) {
+                        entry = "/feature" + entry;
+                    }
+                    return entry != null && entry.equals(featureName);
+                });
     }
 
     public List<User> findAllUsers() {
@@ -318,5 +324,25 @@ public class UserService {
                 managerService.determineAndSetManager(user);
             }
         }
+    }
+
+    public User findById(int userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    public Department getDepartmentById(int departmentId) {
+        return departmentRepository.findById(departmentId).orElse(null);
+    }
+
+    public Role getMainRole(int userId) {
+        List<UserRole> userRoles = userRoleRepository.findByUser_UserId(userId);
+        if (userRoles != null && !userRoles.isEmpty()) {
+            return userRoles.get(0).getRole();
+        }
+        return null;
+    }
+
+    public List<Department> getAllDepartments() {
+        return departmentRepository.findAll();
     }
 }

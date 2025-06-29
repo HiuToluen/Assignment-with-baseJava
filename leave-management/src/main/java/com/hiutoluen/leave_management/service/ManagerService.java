@@ -1,6 +1,9 @@
 package com.hiutoluen.leave_management.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -230,5 +233,78 @@ public class ManagerService {
         }
 
         determineAndSetManager(user);
+    }
+
+    /**
+     * Get all subordinates recursively (direct and indirect subordinates)
+     *
+     * @param userId ID of the user to find subordinates for
+     * @return List of all subordinates (including subordinates of subordinates)
+     */
+    public List<User> getAllSubordinatesRecursively(int userId) {
+        List<User> allSubordinates = new ArrayList<>();
+        getAllSubordinatesRecursivelyHelper(userId, allSubordinates);
+        return allSubordinates;
+    }
+
+    /**
+     * Helper method to perform recursion
+     *
+     * @param managerId       ID of the current manager
+     * @param allSubordinates List to contain all subordinates
+     */
+    private void getAllSubordinatesRecursivelyHelper(int managerId, List<User> allSubordinates) {
+        // Get all direct subordinates
+        List<User> directSubordinates = userRepository.findByManagerId(managerId);
+
+        for (User subordinate : directSubordinates) {
+            // Add direct subordinate to the list
+            allSubordinates.add(subordinate);
+
+            // Recursively get subordinates of this subordinate
+            getAllSubordinatesRecursivelyHelper(subordinate.getUserId(), allSubordinates);
+        }
+    }
+
+    /**
+     * Get direct subordinates only
+     *
+     * @param userId ID of the user
+     * @return List of direct subordinates
+     */
+    public List<User> getDirectSubordinates(int userId) {
+        return userRepository.findByManagerId(userId);
+    }
+
+    /**
+     * Get all subordinates with detailed level information
+     *
+     * @param userId ID of the user
+     * @return Map with key as level and value as list of users at that level
+     */
+    public Map<Integer, List<User>> getSubordinatesByLevel(int userId) {
+        Map<Integer, List<User>> subordinatesByLevel = new HashMap<>();
+        getSubordinatesByLevelHelper(userId, 1, subordinatesByLevel);
+        return subordinatesByLevel;
+    }
+
+    /**
+     * Helper method to get subordinates by level
+     *
+     * @param managerId           ID of the current manager
+     * @param level               Current level
+     * @param subordinatesByLevel Map to contain the result
+     */
+    private void getSubordinatesByLevelHelper(int managerId, int level, Map<Integer, List<User>> subordinatesByLevel) {
+        List<User> directSubordinates = userRepository.findByManagerId(managerId);
+
+        if (!directSubordinates.isEmpty()) {
+            subordinatesByLevel.computeIfAbsent(level, k -> new ArrayList<>()).addAll(directSubordinates);
+
+            // Recursion for next level
+            for (User subordinate : directSubordinates) {
+                getSubordinatesByLevelHelper(subordinate.getUserId(), level + 1, subordinatesByLevel);
+            }
+        }
     }
 }

@@ -67,25 +67,28 @@ public class AuthPublicController {
 
     @GetMapping("/login")
     public String loginPage(Model model, HttpSession session) {
-        String error = (String) session.getAttribute("error");
+        String loginError = (String) session.getAttribute("loginError");
         model.addAttribute("user", new User());
-        model.addAttribute("error", error != null ? error : "");
-        session.removeAttribute("error");
+        if (loginError != null && !loginError.trim().isEmpty()) {
+            model.addAttribute("loginError", loginError);
+        }
+        session.removeAttribute("loginError");
         return "login";
     }
 
     @PostMapping("/login")
     public String login(@ModelAttribute("user") User user, Model model, HttpSession session) {
+        System.out.println("DEBUG: username=" + user.getUsername());
+        System.out.println("DEBUG: password=" + user.getPassword());
         User existingUser = userService.findByUsername(user.getUsername());
         if (existingUser != null && BCrypt.checkpw(user.getPassword(), existingUser.getPassword())) {
             session.setAttribute("currentUser", existingUser);
-            System.out.println("Logged in user: " + existingUser.getUsername());
             if ("admin".equalsIgnoreCase(existingUser.getUsername())) {
                 return "redirect:/admin/users";
             }
             return "redirect:/home";
         } else {
-            session.setAttribute("error", "Invalid credentials");
+            session.setAttribute("loginError", "Invalid username or password. Please try again.");
             return "redirect:/login";
         }
     }

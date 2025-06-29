@@ -6,12 +6,12 @@ INSERT INTO Roles (role_name) VALUES
 INSERT INTO Features (feature_name, entrypoint) VALUES
 ('Create Leave Request', '/request/create'),
 ('View Subordinate Requests', '/request/view-subordinates'),
-('View Agenda', '/agenda');
+('View Agenda', '/agenda'),
+('Show My Leave Request', '/request/mylr');
 
 -- Insert role-feature mappings
 INSERT INTO Role_Features (role_id, feature_id) VALUES
 (1, 1), -- Employee: Create Leave Request
-(1, 3), -- Employee: View Agenda
 (2, 1), -- Manager: Create Leave Request
 (2, 2), -- Manager: View Subordinate Requests
 (2, 3), -- Manager: View Agenda
@@ -20,7 +20,11 @@ INSERT INTO Role_Features (role_id, feature_id) VALUES
 (3, 3), -- Department Manager: View Agenda
 (4, 1), -- Director: Create Leave Request
 (4, 2), -- Director: View Subordinate Requests
-(4, 3); -- Director: View Agenda
+(4, 3), -- Director: View Agenda
+(1,4),
+(2,4),
+(3,4),
+(4,4);
 
 -- Insert departments (initially without managers)
 INSERT INTO Departments (department_name, id_manager) VALUES
@@ -29,13 +33,13 @@ INSERT INTO Departments (department_name, id_manager) VALUES
 ('Finance Department', NULL),
 ('Marketing Department', NULL);
 
--- Insert users with proper hierarchy
+-- Insert users with proper hierarchy(pass = 123)
 INSERT INTO Users (username, password, full_name, department_id, email) VALUES
-('admin', '$2a$12$abcdefghijklmnopqrstuv$hashed_password', 'Admin User', 1, 'admin@example.com'),
-('director1', '$2a$12$abcdefghijklmnopqrstuv$hashed_password', 'Mr Director', 1, 'director@example.com'),
-('dept_manager1', '$2a$12$abcdefghijklmnopqrstuv$hashed_password', 'Mr Department Manager', 1, 'deptmanager@example.com'),
-('manager1', '$2a$12$abcdefghijklmnopqrstuv$hashed_password', 'Mr Manager', 1, 'manager@example.com'),
-('employee1', '$2a$12$abcdefghijklmnopqrstuv$hashed_password', 'Mr Employee', 1, 'employee@example.com');
+('admin', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Admin User', 1, 'admin@example.com'),
+('director1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Director', 1, 'director@example.com'),
+('dept_manager1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Department Manager', 1, 'deptmanager@example.com'),
+('manager1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Manager', 1, 'manager@example.com'),
+('employee1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Employee', 1, 'employee@example.com');
 
 -- Assign roles (admin assigns roles)
 INSERT INTO User_Roles (user_id, role_id, assigned_by) VALUES
@@ -59,9 +63,9 @@ UPDATE Users SET manager_id = 2 WHERE user_id = 3; -- dept_manager1 (Department 
 UPDATE Users SET manager_id = NULL WHERE user_id = 2; -- director1 (Director) has no manager
 
 -- Insert sample leave request
-INSERT INTO Leave_Requests (user_id, start_date, end_date, reason, status)
-VALUES (5, '2025-06-21', '2025-06-23', 'Vacation', 'Inprogress');
-
+-- Insert sample leave request
+INSERT INTO Leave_Requests (user_id, start_date, end_date, reason, status, title)
+VALUES (5, '2025-06-21', '2025-06-23', 'Vacation', 'Inprogress', 'Vacation'); 
 -- Insert sample agenda
 INSERT INTO Agenda (user_id, date, status)
 VALUES (5, '2025-06-20', 'Working');
