@@ -117,8 +117,39 @@ public class ManagerService {
     }
 
     private void setManagerForEmployee(User user) {
-        Department department = departmentRepository.findById(user.getDepartmentId()).orElse(null);
+        // Kiểm tra managerId hiện tại có còn hợp lệ không (cùng phòng và là cấp trên
+        // hợp lệ)
+        boolean needUpdate = false;
+        if (user.getManagerId() != null) {
+            User currentManager = userRepository.findById(user.getManagerId()).orElse(null);
+            if (currentManager == null) {
+                needUpdate = true;
+            } else {
+                List<UserRole> managerRoles = userRoleRepository.findByUser_UserId(currentManager.getUserId());
+                boolean isManagerValid = managerRoles.stream()
+                        .anyMatch(ur -> (ur.getRole().getRoleId() == DEPARTMENT_MANAGER_ROLE_ID
+                                && currentManager.getDepartmentId() == user.getDepartmentId()) ||
+                                (ur.getRole().getRoleId() == MANAGER_ROLE_ID
+                                        && currentManager.getDepartmentId() == user.getDepartmentId())
+                                ||
+                                (ur.getRole().getRoleId() == DIRECTOR_ROLE_ID));
+                // Nếu managerId không cùng phòng hoặc không còn là cấp trên hợp lệ thì cần
+                // update
+                if (!isManagerValid) {
+                    needUpdate = true;
+                }
+            }
+        } else {
+            needUpdate = true;
+        }
 
+        if (!needUpdate) {
+            // managerId hiện tại vẫn hợp lệ, không cần update
+            return;
+        }
+
+        // Tìm Department Manager cùng phòng
+        Department department = departmentRepository.findById(user.getDepartmentId()).orElse(null);
         if (department != null && department.getIdManager() != null) {
             User departmentManager = userRepository.findById(department.getIdManager()).orElse(null);
             if (departmentManager != null && isUserDepartmentManager(departmentManager) &&
@@ -129,6 +160,7 @@ public class ManagerService {
             }
         }
 
+        // Nếu không có, tìm Director
         List<UserRole> directorRoles = userRoleRepository.findByRole_RoleId(DIRECTOR_ROLE_ID);
         if (!directorRoles.isEmpty()) {
             User director = directorRoles.get(0).getUser();
@@ -139,6 +171,7 @@ public class ManagerService {
             }
         }
 
+        // Nếu không có ai hợp lệ, set null
         user.setManagerId(null);
         userRepository.save(user);
     }
@@ -305,6 +338,14 @@ public class ManagerService {
             for (User subordinate : directSubordinates) {
                 getSubordinatesByLevelHelper(subordinate.getUserId(), level + 1, subordinatesByLevel);
             }
+        }
+    }
+
+    @Transactional
+    public void updateSubordinatesManagerAssignments(int managerId) {
+        List<User> subordinates = getAllSubordinatesRecursively(managerId);
+        for (User subordinate : subordinates) {
+            determineAndSetManager(subordinate);
         }
     }
 }

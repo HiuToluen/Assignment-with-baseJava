@@ -144,40 +144,56 @@
                                                         </td>
                                                         <td>
                                                             <c:set var="currentRoleId" value="0" />
+                                                            <c:set var="isDirector" value="false" />
                                                             <c:if test="${not empty user.userRoles}">
                                                                 <c:forEach var="userRole" items="${user.userRoles}">
                                                                     <c:set var="currentRoleId"
                                                                         value="${userRole.role.roleId}" />
+                                                                    <c:if test="${userRole.role.roleId == 4}">
+                                                                        <c:set var="isDirector" value="true" />
+                                                                    </c:if>
                                                                 </c:forEach>
                                                             </c:if>
                                                             <c:choose>
-                                                                <c:when
-                                                                    test="${currentRoleId == 1 && user.managerId == null}">
-                                                                    <c:set var="deptManagerId" value="0" />
-                                                                    <c:forEach var="department" items="${departments}">
-                                                                        <c:if
-                                                                            test="${user.departmentId == department.departmentId}">
-                                                                            <c:set var="deptManagerId"
-                                                                                value="${department.idManager}" />
-                                                                        </c:if>
-                                                                    </c:forEach>
-                                                                    <c:out
-                                                                        value="${managerNames[deptManagerId] != null ? managerNames[deptManagerId] : 'N/A'}" />
+                                                                <c:when test="${isDirector}">
+                                                                    N/A
+                                                                </c:when>
+                                                                <c:when test="${managerNames[user.managerId] != null}">
+                                                                    <c:out value="${managerNames[user.managerId]}" />
                                                                 </c:when>
                                                                 <c:otherwise>
-                                                                    <c:out
-                                                                        value="${managerNames[user.managerId] != null ? managerNames[user.managerId] : 'N/A'}" />
+                                                                    <c:set var="foundDeptManager" value="false" />
+                                                                    <c:forEach var="u" items="${users}">
+                                                                        <c:if
+                                                                            test="${u.departmentId == user.departmentId}">
+                                                                            <c:forEach var="ur" items="${u.userRoles}">
+                                                                                <c:if test="${ur.role.roleId == 3}">
+                                                                                    <c:out value="${u.fullName}" />
+                                                                                    <c:set var="foundDeptManager"
+                                                                                        value="true" />
+                                                                                </c:if>
+                                                                            </c:forEach>
+                                                                        </c:if>
+                                                                    </c:forEach>
+                                                                    <c:if test="${!foundDeptManager}">
+                                                                        <c:set var="foundDirector" value="false" />
+                                                                        <c:forEach var="u" items="${users}">
+                                                                            <c:forEach var="ur" items="${u.userRoles}">
+                                                                                <c:if test="${ur.role.roleId == 4}">
+                                                                                    <c:out value="${u.fullName}" />
+                                                                                    <c:set var="foundDirector"
+                                                                                        value="true" />
+                                                                                </c:if>
+                                                                            </c:forEach>
+                                                                        </c:forEach>
+                                                                        <c:if test="${!foundDirector}">
+                                                                            N/A
+                                                                        </c:if>
+                                                                    </c:if>
                                                                 </c:otherwise>
                                                             </c:choose>
                                                         </td>
                                                         <td>
-                                                            <c:set var="currentRoleId" value="0" />
-                                                            <c:if test="${not empty user.userRoles}">
-                                                                <c:forEach var="userRole" items="${user.userRoles}">
-                                                                    <c:set var="currentRoleId"
-                                                                        value="${userRole.role.roleId}" />
-                                                                </c:forEach>
-                                                            </c:if>
                                                             <span class="badge
                                                                 <c:choose>
                                                                     <c:when test='${currentRoleId == 1}'>badge-employee</c:when>
@@ -185,7 +201,7 @@
                                                                     <c:when test='${currentRoleId == 3}'>badge-dept-manager</c:when>
                                                                     <c:when test='${currentRoleId == 4}'>badge-director</c:when>
                                                                     <c:otherwise>badge-employee</c:otherwise>
-                                                                </c:choose>">
+                                                                </c:choose>'">
                                                                 <c:choose>
                                                                     <c:when test="${currentRoleId == 1}">Employee
                                                                     </c:when>
@@ -200,17 +216,21 @@
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <div class="action-buttons">
-                                                                <a href="${pageContext.request.contextPath}/admin/users/update/${user.userId}"
-                                                                    class="btn-update">
-                                                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                            <a href="${pageContext.request.contextPath}/admin/users/update/${user.userId}"
+                                                                class="btn btn-sm btn-primary mb-1">
+                                                                <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+                                                            </a>
+                                                            <c:if test="${!isDirector}">
+                                                                <a href="${pageContext.request.contextPath}/admin/users/update-manager/${user.userId}"
+                                                                    class="btn btn-sm btn-warning mb-1">
+                                                                    <i class="fa-solid fa-user-tie me-1"></i> Manager
                                                                 </a>
-                                                                <a href="${pageContext.request.contextPath}/admin/users/delete/${user.userId}"
-                                                                    class="btn-delete"
-                                                                    onclick="return confirm('Are you sure you want to delete this user?')">
-                                                                    <i class="fa-solid fa-trash"></i> Delete
-                                                                </a>
-                                                            </div>
+                                                            </c:if>
+                                                            <a href="${pageContext.request.contextPath}/admin/users/delete/${user.userId}"
+                                                                class="btn btn-sm btn-danger mb-1"
+                                                                onclick="return confirm('Are you sure you want to delete this user?');">
+                                                                <i class="fa-solid fa-trash me-1"></i> Delete
+                                                            </a>
                                                         </td>
                                                     </tr>
                                                 </c:forEach>

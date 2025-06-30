@@ -214,6 +214,25 @@ body {
   text-decoration: none;
 }
 
+.btn-manager {
+  background: var(--gradient-warning);
+  border: none;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-light);
+}
+
+.btn-manager:hover {
+  background: #f59e0b;
+  color: #fff;
+  text-decoration: none;
+}
+
 .btn-delete {
   background: var(--gradient-danger);
   border: none;

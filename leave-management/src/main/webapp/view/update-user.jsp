@@ -31,8 +31,8 @@
                     </div>
 
                     <!-- Update Form -->
-                    <form:form modelAttribute="user" method="post"
-                        action="${pageContext.request.contextPath}/admin/users/update" class="slide-up">
+                    <form id="user" method="post" action="${pageContext.request.contextPath}/admin/users/update"
+                        class="slide-up">
                         <!-- ID & Username Row -->
                         <div class="row">
                             <div class="col-md-6">
@@ -40,7 +40,9 @@
                                     <label for="userId" class="form-label">
                                         <i class="fa-solid fa-id-badge me-2"></i>User ID
                                     </label>
-                                    <form:input path="userId" id="userId" class="form-control" readonly="true" />
+                                    <input type="hidden" name="userId" value="${user.userId}" />
+                                    <input type="text" id="userId" class="form-control" readonly
+                                        value="${user.userId}" />
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -48,79 +50,51 @@
                                     <label for="username" class="form-label">
                                         <i class="fa-solid fa-user me-2"></i>Username
                                     </label>
-                                    <form:input path="username" id="username" class="form-control" readonly="true" />
+                                    <input type="hidden" name="username" value="${user.username}" />
+                                    <input type="text" id="username" class="form-control" readonly
+                                        value="${user.username}" />
                                 </div>
                             </div>
                         </div>
 
                         <!-- Full Name -->
                         <div class="form-group">
-                            <c:set var="errorFullName">
-                                <form:errors path="fullName" cssClass="invalid-feedback" />
-                            </c:set>
                             <label for="fullName" class="form-label">
                                 <i class="fa-solid fa-id-card me-2"></i>Full Name
                             </label>
-                            <form:input path="fullName" id="fullName"
-                                class="form-control ${not empty errorFullName ? 'is-invalid' : ''}"
-                                placeholder="Enter full name" />
-                            ${errorFullName}
+                            <input type="text" name="fullName" id="fullName" class="form-control"
+                                placeholder="Enter full name" value="${user.fullName}" required />
                         </div>
 
                         <!-- Email -->
                         <div class="form-group">
-                            <c:set var="errorEmail">
-                                <form:errors path="email" cssClass="invalid-feedback" />
-                            </c:set>
                             <label for="email" class="form-label">
                                 <i class="fa-solid fa-envelope me-2"></i>Email Address
                             </label>
-                            <form:input path="email" id="email"
-                                class="form-control ${not empty errorEmail ? 'is-invalid' : ''}"
-                                placeholder="Enter email address" />
-                            ${errorEmail}
+                            <input type="email" name="email" id="email" class="form-control"
+                                placeholder="Enter email address" value="${user.email}" required />
                         </div>
 
                         <!-- Department -->
-                        <div class="form-group">
+                        <div class="form-group" id="departmentGroup">
                             <label for="departmentId" class="form-label">
                                 <i class="fa-solid fa-building me-2"></i>Department
                             </label>
-                            <form:select path="departmentId" id="departmentId" class="form-select" required="true">
+                            <select name="departmentId" id="departmentId" class="form-select" required>
                                 <option value="">Select department</option>
-                                <form:options items="${departments}" itemValue="departmentId"
-                                    itemLabel="departmentName" />
-                            </form:select>
-                            <c:set var="errorDepartment">
-                                <form:errors path="departmentId" cssClass="invalid-feedback" />
-                            </c:set>
-                            ${errorDepartment}
+                                <c:forEach var="dept" items="${departments}">
+                                    <option value="${dept.departmentId}" ${user.departmentId==dept.departmentId
+                                        ? 'selected' : '' }>
+                                        ${dept.departmentName}
+                                    </option>
+                                </c:forEach>
+                            </select>
                         </div>
 
                         <!-- Manager & Role Row -->
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="managerId" class="form-label">
-                                        <i class="fa-solid fa-user-tie me-2"></i>Manager
-                                    </label>
-                                    <form:select path="managerId" id="managerId" class="form-select" required="true">
-                                        <c:set var="defaultManagerId" value="${user.managerId}" />
-                                        <c:if test="${empty user.managerId}">
-                                            <c:forEach var="department" items="${departments}">
-                                                <c:if test="${user.departmentId == department.departmentId}">
-                                                    <c:set var="defaultManagerId" value="${department.idManager}" />
-                                                </c:if>
-                                            </c:forEach>
-                                        </c:if>
-                                        <form:option value="${defaultManagerId}"
-                                            label="${managerNames[defaultManagerId] != null ? managerNames[defaultManagerId] : 'Select Manager'}" />
-                                        <form:options items="${managerNames}" />
-                                    </form:select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
+                            <!-- Manager field removed -->
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="roleId" class="form-label">
                                         <i class="fa-solid fa-shield-halved me-2"></i>Role
@@ -131,19 +105,14 @@
                                             <c:set var="currentRoleId" value="${userRole.role.roleId}" />
                                         </c:forEach>
                                     </c:if>
-                                    <select name="roleId" id="roleId" class="form-select" required>
-                                        <option value="1" ${currentRoleId==1 ? 'selected' : '' }>
-                                            <i class="fa-solid fa-user me-2"></i>Employee
+                                    <select name="roleId" id="roleId" class="form-select" required
+                                        data-current-role="${currentRoleId}" style="width:100%;">
+                                        <option value="">Select Role</option>
+                                        <option value="1" ${currentRoleId==1 ? 'selected' : '' }>Employee</option>
+                                        <option value="2" ${currentRoleId==2 ? 'selected' : '' }>Manager</option>
+                                        <option value="3" ${currentRoleId==3 ? 'selected' : '' }>Department Manager
                                         </option>
-                                        <option value="2" ${currentRoleId==2 ? 'selected' : '' }>
-                                            <i class="fa-solid fa-user-tie me-2"></i>Manager
-                                        </option>
-                                        <option value="3" ${currentRoleId==3 ? 'selected' : '' }>
-                                            <i class="fa-solid fa-user-shield me-2"></i>Department Manager
-                                        </option>
-                                        <option value="4" ${currentRoleId==4 ? 'selected' : '' }>
-                                            <i class="fa-solid fa-crown me-2"></i>Director
-                                        </option>
+                                        <option value="4" ${currentRoleId==4 ? 'selected' : '' }>Director</option>
                                     </select>
                                 </div>
                             </div>
@@ -153,7 +122,7 @@
                         <button type="submit" class="btn-primary" id="updateBtn">
                             <i class="fa-solid fa-save me-2"></i>Update User
                         </button>
-                    </form:form>
+                    </form>
 
                     <!-- Back Button -->
                     <div class="text-center mt-3">
@@ -168,19 +137,6 @@
 
                 <!-- Custom JavaScript -->
                 <script>
-                    // Add loading animation to update button
-                    document.getElementById('updateBtn').addEventListener('click', function (e) {
-                        const originalText = this.innerHTML;
-                        this.innerHTML = '<span class="loading-spinner me-2"></span>Updating...';
-                        this.disabled = true;
-
-                        // Reset after 5 seconds if update doesn't happen
-                        setTimeout(() => {
-                            this.innerHTML = originalText;
-                            this.disabled = false;
-                        }, 5000);
-                    });
-
                     // Add some interactive effects
                     document.addEventListener('DOMContentLoaded', function () {
                         const container = document.querySelector('.auth-container');
@@ -210,6 +166,32 @@
 
                         // Role change effect
                         const roleSelect = document.getElementById('roleId');
+                        const departmentGroup = document.getElementById('departmentGroup');
+                        const departmentSelect = document.getElementById('departmentId');
+
+                        function handleRoleChange() {
+                            const selectedRole = roleSelect.value;
+                            if (selectedRole === '4') { // Director
+                                departmentGroup.style.display = 'none';
+                                departmentSelect.value = '';
+                                departmentSelect.required = false;
+                            } else {
+                                departmentGroup.style.display = 'block';
+                                departmentSelect.required = true;
+                            }
+                        }
+
+                        // Initial check: nếu là Director thì ẩn luôn
+                        const initialRole = roleSelect.getAttribute('data-current-role');
+                        if (initialRole === '4') {
+                            departmentGroup.style.display = 'none';
+                            departmentSelect.value = '';
+                            departmentSelect.required = false;
+                        } else {
+                            departmentGroup.style.display = 'block';
+                            departmentSelect.required = true;
+                        }
+
                         roleSelect.addEventListener('change', function () {
                             const selectedOption = this.options[this.selectedIndex];
                             const roleText = selectedOption.text;
@@ -222,6 +204,26 @@
                                 this.style.borderColor = '#e3e6f0';
                                 this.style.boxShadow = 'none';
                             }, 2000);
+
+                            // Handle role-specific logic
+                            handleRoleChange();
+                        });
+
+                        // Add loading animation to update button (FIXED - won't prevent submit)
+                        const updateBtn = document.getElementById('updateBtn');
+                        const form = document.getElementById('user');
+
+                        form.addEventListener('submit', function () {
+                            // Show loading animation when form is actually submitting
+                            const originalText = updateBtn.innerHTML;
+                            updateBtn.innerHTML = '<span class="loading-spinner me-2"></span>Updating...';
+                            updateBtn.disabled = true;
+
+                            // Reset after 5 seconds if something goes wrong
+                            setTimeout(() => {
+                                updateBtn.innerHTML = originalText;
+                                updateBtn.disabled = false;
+                            }, 5000);
                         });
                     });
                 </script>

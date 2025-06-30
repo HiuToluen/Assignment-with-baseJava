@@ -117,12 +117,21 @@ public class UserService {
 
     public List<User> findAllUsers() {
         List<User> users = userRepository.findAll();
-        for (User user : users) {
-            if (!"admin".equalsIgnoreCase(user.getUsername())) {
-                managerService.determineAndSetManager(user);
-            }
-        }
+        // Don't call determineAndSetManager as it will override manually set manager
+        // IDs
+        // for (User user : users) {
+        // if (!"admin".equalsIgnoreCase(user.getUsername())) {
+        // managerService.determineAndSetManager(user);
+        // }
+        // }
         return users;
+    }
+
+    /**
+     * Load users for admin pages without overriding manually set manager IDs
+     */
+    public List<User> findAllUsersForAdmin() {
+        return userRepository.findAll();
     }
 
     public void validateInputLists(List<User> users, List<Integer> roleIds) {
@@ -168,7 +177,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(User user, Integer roleId) {
+    public User updateUser(User user, Integer roleId, int adminUserId) {
         User existingUser = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + user.getUserId()));
         if ("admin".equalsIgnoreCase(existingUser.getUsername())) {
@@ -180,10 +189,30 @@ public class UserService {
         Integer oldRoleId = oldUserRoles.isEmpty() ? null : oldUserRoles.get(0).getRole().getRoleId();
 
         updateUserInformation(existingUser, user);
-        deleteExistingRoles(existingUser.getUserId());
-        assignNewRole(existingUser, roleId, 1);
 
-        if (roleId != null && !roleId.equals(oldRoleId)) {
+        // After updating department, check manager validity
+        if (existingUser.getManagerId() != null) {
+            User manager = userRepository.findById(existingUser.getManagerId()).orElse(null);
+            if (manager != null) {
+                Role managerRole = getMainRole(manager.getUserId());
+                boolean isManagerDirector = managerRole != null
+                        && "Director".equalsIgnoreCase(managerRole.getRoleName());
+                boolean isSameDepartment = manager.getDepartmentId() == existingUser.getDepartmentId();
+                if (!(isManagerDirector || isSameDepartment)) {
+                    existingUser.setManagerId(null);
+                }
+            } else {
+                existingUser.setManagerId(null);
+            }
+        }
+
+        deleteExistingRoles(existingUser.getUserId());
+        assignNewRole(existingUser, roleId, adminUserId);
+
+        boolean departmentChanged = user.getDepartmentId() != oldDepartmentId;
+        boolean roleChanged = (roleId != null && !roleId.equals(oldRoleId));
+
+        if (roleChanged) {
             if (roleId == 3) {
                 managerService.updateDepartmentManager(existingUser, user.getDepartmentId());
             } else if (oldRoleId != null && oldRoleId == 3) {
@@ -195,7 +224,7 @@ public class UserService {
                 }
             }
             managerService.handleRoleChange(existingUser, roleId);
-        } else if (user.getDepartmentId() != oldDepartmentId) {
+        } else if (departmentChanged) {
             if (oldRoleId != null && oldRoleId == 3) {
                 Department oldDept = departmentRepository.findById(oldDepartmentId).orElse(null);
                 if (oldDept != null && oldDept.getIdManager() != null &&
@@ -210,7 +239,36 @@ public class UserService {
             managerService.determineAndSetManager(existingUser);
         }
 
+        // Update all subordinates' manager assignments if department or role changed
+        if (departmentChanged || roleChanged) {
+            managerService.updateSubordinatesManagerAssignments(existingUser.getUserId());
+        }
+
         return existingUser;
+    }
+
+    @Transactional
+    public User updateUserManager(User user, int adminUserId) {
+        User existingUser = userRepository.findById(user.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + user.getUserId()));
+        if ("admin".equalsIgnoreCase(existingUser.getUsername())) {
+            throw new IllegalArgumentException("Cannot update admin user.");
+        }
+
+        System.out.println("DEBUG: UserService - Before update, manager ID: " + existingUser.getManagerId());
+        System.out.println("DEBUG: UserService - New manager ID to set: " + user.getManagerId());
+
+        // Update only manager
+        existingUser.setManagerId(user.getManagerId());
+        User savedUser = userRepository.save(existingUser);
+
+        System.out.println("DEBUG: UserService - After save, manager ID: " + savedUser.getManagerId());
+
+        // Don't call determineAndSetManager as it will override the manually set
+        // managerId
+        // managerService.determineAndSetManager(existingUser);
+
+        return savedUser;
     }
 
     public String generateRandomPassword() {
@@ -285,11 +343,13 @@ public class UserService {
                 departmentId,
                 roleId);
 
-        for (User user : users) {
-            if (!"admin".equalsIgnoreCase(user.getUsername())) {
-                managerService.determineAndSetManager(user);
-            }
-        }
+        // Don't call determineAndSetManager as it will override manually set manager
+        // IDs
+        // for (User user : users) {
+        // if (!"admin".equalsIgnoreCase(user.getUsername())) {
+        // managerService.determineAndSetManager(user);
+        // }
+        // }
         return users;
     }
 

@@ -28,4 +28,12 @@ public class ErrorController {
                 errorMessage != null ? errorMessage : "Internal server error. Please try again later.");
         return "error/500";
     }
+
+    @GetMapping("/error/404")
+    public String error404(@RequestParam(required = false) String errorMessage, Model model) {
+        model.addAttribute("errorMessage",
+                errorMessage != null ? errorMessage
+                        : "The page you are looking for does not exist or you do not have access.");
+        return "error/404";
+    }
 }

@@ -17,8 +17,8 @@
 }
 
 body {
-  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 50%, #fbc2eb 100%);
   min-height: 100vh;
+  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 50%, #fbc2eb 100%);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
@@ -30,27 +30,39 @@ body {
 
 /* Error Container */
 .error-container {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  padding: 3rem;
+  max-width: 420px;
+  width: 100%;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12);
+  padding: 2.5rem 2rem 2rem 2rem;
   text-align: center;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: var(--shadow-heavy);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  position: relative;
-  overflow: hidden;
+  margin: 2rem auto;
 }
 
-.error-container::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-  background: var(--gradient-error);
+.error-emoji {
+  font-size: 4.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.error-code {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.error-desc {
+  color: #666;
+  font-size: 1.05rem;
+  margin-bottom: 1.5rem;
 }
 
 /* Error Icon */
@@ -71,23 +83,6 @@ body {
   100% {
     transform: scale(1);
   }
-}
-
-/* Error Code */
-.error-code {
-  font-size: 4rem;
-  font-weight: 700;
-  color: var(--error-primary);
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Error Title */
-.error-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: var(--error-dark);
-  margin-bottom: 1rem;
 }
 
 /* Error Message */
@@ -164,6 +159,26 @@ body {
   text-decoration: none;
 }
 
+/* Login Button */
+.btn-login {
+  background: var(--gradient-error);
+  border: none;
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-light);
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  color: white;
+  text-decoration: none;
+}
+
 /* Animation Classes */
 .fade-in {
   animation: fadeIn 0.8s ease-in;
@@ -219,7 +234,8 @@ body {
 
   .btn-primary,
   .btn-secondary,
-  .btn-home {
+  .btn-home,
+  .btn-login {
     width: 100%;
     max-width: 250px;
   }
@@ -232,7 +248,7 @@ body {
   height: 20px;
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: white;
+  border-top-color: #fff;
   animation: spin 1s ease-in-out infinite;
 }
 
@@ -242,7 +258,7 @@ body {
   }
 }
 
-/* Special Error Types */
+/* Warning and Success States */
 .error-container.warning::before {
   background: var(--gradient-warning);
 }
