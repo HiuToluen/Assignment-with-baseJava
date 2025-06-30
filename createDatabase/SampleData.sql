@@ -36,10 +36,12 @@ INSERT INTO Departments (department_name, id_manager) VALUES
 -- Insert users with proper hierarchy(pass = 123)
 INSERT INTO Users (username, password, full_name, department_id, email) VALUES
 ('admin', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Admin User', 1, 'admin@example.com'),
-('director1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Director', 1, 'director@example.com'),
 ('dept_manager1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Department Manager', 1, 'deptmanager@example.com'),
 ('manager1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Manager', 1, 'manager@example.com'),
 ('employee1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Employee', 1, 'employee@example.com');
+
+INSERT INTO Users (username, password, full_name, email) VALUES
+('director1', '$2a$12$abcdefghijklmnopqrstuua60oqndqwPu2tmWuGI8U8eQZvjU2ISu', 'Mr Director', 'director@example.com')
 
 -- Assign roles (admin assigns roles)
 INSERT INTO User_Roles (user_id, role_id, assigned_by) VALUES
