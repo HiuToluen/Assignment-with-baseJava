@@ -10,6 +10,29 @@
                 <title>Leave Request Detail</title>
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/feature/styles.css" />
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+                <style>
+                    .status-badge {
+                        font-size: 1em;
+                        padding: 0.3em 0.8em;
+                        border-radius: 0.5em;
+                        font-weight: bold;
+                    }
+
+                    .status-inprogress {
+                        background: #ffe066;
+                        color: #222;
+                    }
+
+                    .status-approved {
+                        background: #7bed9f;
+                        color: #222;
+                    }
+
+                    .status-rejected {
+                        background: #e74c3c;
+                        color: #fff;
+                    }
+                </style>
             </head>
 
             <body>

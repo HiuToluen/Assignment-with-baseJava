@@ -1,5 +1,6 @@
 package com.hiutoluen.leave_management.controller.feature;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -70,10 +74,16 @@ public class UserFeatureController {
     }
 
     @GetMapping("/request/mylr")
-    public String myLeaveRequestPage(Model model, HttpSession session) {
+    public String myLeaveRequestPage(Model model, HttpSession session,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
         User user = (User) session.getAttribute("currentUser");
+        Pageable pageable = PageRequest.of(page, size);
+        Page<LeaveRequest> myLeaveRequests = leaveRequestService.getRequestsByUserId(user.getUserId(), pageable);
         model.addAttribute("user", user);
-        model.addAttribute("myLeaveRequests", leaveRequestService.getRequestsByUserId(user.getUserId()));
+        model.addAttribute("myLeaveRequests", myLeaveRequests);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
         return "feature/my-leave-request";
     }
 
@@ -160,12 +170,16 @@ public class UserFeatureController {
             cal.add(java.util.Calendar.DAY_OF_MONTH, 6);
             endDate = cal.getTime();
         }
-        // Build list of dates in range
+        // Build list of dates in range, đồng thời tạo map đánh dấu ngày làm việc
         List<java.util.Date> dateList = new java.util.ArrayList<>();
+        Map<Long, Boolean> workdayMap = new HashMap<>(); // key: date.getTime(), value: true nếu là ngày làm việc
         cal.setTime(startDate);
         while (!cal.getTime().after(endDate)) {
+            int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+            boolean isWorkday = (dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY);
             dateList.add(cal.getTime());
-            cal.add(java.util.Calendar.DAY_OF_MONTH, 1);
+            workdayMap.put(cal.getTime().getTime(), isWorkday);
+            cal.add(Calendar.DAY_OF_MONTH, 1);
         }
 
         // Determine if user is director
@@ -242,6 +256,7 @@ public class UserFeatureController {
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("user", user);
+        model.addAttribute("workdayMap", workdayMap);
         return "feature/agenda";
     }
 
@@ -332,7 +347,6 @@ public class UserFeatureController {
             model.addAttribute("errorMessage", "Leave request not found.");
             return "error/403";
         }
-        // Lấy tất cả cấp dưới (bao gồm cả gián tiếp)
         List<User> allSubordinates = managerService.getAllSubordinatesRecursively(currentUser.getUserId());
         Set<Integer> subordinateIds = allSubordinates.stream().map(User::getUserId).collect(Collectors.toSet());
         boolean isManager = subordinateIds.contains(leaveRequest.getUserId());
@@ -347,7 +361,6 @@ public class UserFeatureController {
             leaveRequestService.rejectRequest(requestId, processReason, currentUser.getUserId());
             model.addAttribute("successMessage", "Leave request rejected successfully.");
         }
-        // Redirect lại trang detail để xem kết quả
         return "redirect:/feature/request/detail?requestId=" + requestId;
     }
 }

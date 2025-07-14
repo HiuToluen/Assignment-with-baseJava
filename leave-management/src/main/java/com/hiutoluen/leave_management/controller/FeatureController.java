@@ -2,6 +2,9 @@ package com.hiutoluen.leave_management.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +43,9 @@ public class FeatureController {
     }
 
     @GetMapping("/admin/features")
-    public String featuresPage(Model model, HttpSession session) {
+    public String featuresPage(Model model, HttpSession session,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
         User user = (User) session.getAttribute("currentUser");
         if (user == null) {
             return "redirect:/login";
@@ -48,10 +53,12 @@ public class FeatureController {
         if (!userService.hasPermission(user.getUsername(), "/admin/features")) {
             return "redirect:/error/403";
         }
-
-        List<Feature> features = featureRepository.findAll();
-        model.addAttribute("features", features);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Feature> featurePage = featureRepository.findAll(pageable);
+        model.addAttribute("featurePage", featurePage);
         model.addAttribute("newFeature", new Feature());
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
         return "admin-features";
     }
 
@@ -84,7 +91,9 @@ public class FeatureController {
     }
 
     @GetMapping("/admin/permissions")
-    public String permissionsPage(Model model, HttpSession session) {
+    public String permissionsPage(Model model, HttpSession session,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
         User user = (User) session.getAttribute("currentUser");
         if (user == null) {
             return "redirect:/login";
@@ -92,14 +101,15 @@ public class FeatureController {
         if (!userService.hasPermission(user.getUsername(), "/admin/permissions")) {
             return "redirect:/error/403";
         }
-
+        Pageable pageable = PageRequest.of(page, size);
         List<Role> roles = roleRepository.findAll();
         List<Feature> features = featureRepository.findAll();
-        List<RoleFeature> roleFeatures = roleFeatureRepository.findAll();
-
+        Page<RoleFeature> roleFeaturePage = roleFeatureRepository.findAll(pageable);
         model.addAttribute("roles", roles);
         model.addAttribute("features", features);
-        model.addAttribute("roleFeatures", roleFeatures);
+        model.addAttribute("roleFeaturePage", roleFeaturePage);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
         return "admin-permissions";
     }
 

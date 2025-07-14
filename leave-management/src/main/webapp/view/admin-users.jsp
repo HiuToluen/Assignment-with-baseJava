@@ -106,7 +106,7 @@
                                     </thead>
                                     <tbody>
                                         <c:choose>
-                                            <c:when test="${empty users}">
+                                            <c:when test="${empty userPage.content}">
                                                 <tr>
                                                     <td colspan="8">
                                                         <div class="empty-state">
@@ -118,8 +118,8 @@
                                                 </tr>
                                             </c:when>
                                             <c:otherwise>
-                                                <c:forEach var="user" items="${users}" varStatus="loop">
-                                                    <tr class="slide-up" style="animation-delay: ${loop.index * 0.1}s;">
+                                                <c:forEach var="user" items="${userPage.content}" varStatus="loop">
+                                                    <tr class="slide-up">
                                                         <td>
                                                             <strong>
                                                                 <c:out value="${user.userId}" />
@@ -163,7 +163,7 @@
                                                                 </c:when>
                                                                 <c:otherwise>
                                                                     <c:set var="foundDeptManager" value="false" />
-                                                                    <c:forEach var="u" items="${users}">
+                                                                    <c:forEach var="u" items="${userPage.content}">
                                                                         <c:if
                                                                             test="${u.departmentId == user.departmentId}">
                                                                             <c:forEach var="ur" items="${u.userRoles}">
@@ -177,7 +177,7 @@
                                                                     </c:forEach>
                                                                     <c:if test="${!foundDeptManager}">
                                                                         <c:set var="foundDirector" value="false" />
-                                                                        <c:forEach var="u" items="${users}">
+                                                                        <c:forEach var="u" items="${userPage.content}">
                                                                             <c:forEach var="ur" items="${u.userRoles}">
                                                                                 <c:if test="${ur.role.roleId == 4}">
                                                                                     <c:out value="${u.fullName}" />
@@ -240,6 +240,27 @@
                                 </table>
                             </div>
                         </div>
+
+                        <!-- Pagination Controls -->
+                        <nav aria-label="User pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <c:if test="${userPage.totalPages > 1}">
+                                    <li class="page-item ${userPage.first ? 'disabled' : ''}">
+                                        <a class="page-link" href="?page=${userPage.number - 1}&size=${userPage.size}"
+                                            tabindex="-1">Previous</a>
+                                    </li>
+                                    <c:forEach begin="0" end="${userPage.totalPages - 1}" var="i">
+                                        <li class="page-item ${userPage.number == i ? 'active' : ''}">
+                                            <a class="page-link" href="?page=${i}&size=${userPage.size}">${i + 1}</a>
+                                        </li>
+                                    </c:forEach>
+                                    <li class="page-item ${userPage.last ? 'disabled' : ''}">
+                                        <a class="page-link"
+                                            href="?page=${userPage.number + 1}&size=${userPage.size}">Next</a>
+                                    </li>
+                                </c:if>
+                            </ul>
+                        </nav>
 
                         <!-- Footer Actions -->
                         <div class="footer-actions">

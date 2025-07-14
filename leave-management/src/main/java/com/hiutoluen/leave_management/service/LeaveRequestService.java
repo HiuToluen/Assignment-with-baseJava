@@ -3,6 +3,8 @@ package com.hiutoluen.leave_management.service;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.hiutoluen.leave_management.model.LeaveRequest;
@@ -25,6 +27,10 @@ public class LeaveRequestService {
                 .stream()
                 .filter(r -> r.getUserId() == userId)
                 .toList();
+    }
+
+    public Page<LeaveRequest> getRequestsByUserId(int userId, Pageable pageable) {
+        return leaveRequestRepository.findByUserId(userId, pageable);
     }
 
     /**

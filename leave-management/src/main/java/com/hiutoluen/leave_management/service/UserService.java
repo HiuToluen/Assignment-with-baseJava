@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -353,6 +355,17 @@ public class UserService {
         return users;
     }
 
+    public Page<User> searchUsers(String username, String fullName, String email, Integer departmentId, Integer roleId,
+            Pageable pageable) {
+        return userRepository.searchUsers(
+                (username == null || username.isBlank()) ? null : username,
+                (fullName == null || fullName.isBlank()) ? null : fullName,
+                (email == null || email.isBlank()) ? null : email,
+                departmentId,
+                roleId,
+                pageable);
+    }
+
     /**
      * Validate and update manager assignments for all users
      * This method should be called when loading data or periodically
@@ -404,5 +417,9 @@ public class UserService {
 
     public List<Department> getAllDepartments() {
         return departmentRepository.findAll();
+    }
+
+    public Page<User> getUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 }

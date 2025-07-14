@@ -3,8 +3,10 @@ package com.hiutoluen.leave_management.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,8 +41,9 @@ public class AuthController {
             @RequestParam(required = false) String email,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer roleId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
             Model model, HttpSession session) {
-        // Đảm bảo đồng bộ lại managerId trước khi hiển thị
         userService.validateManagerAssignments();
         User user = (User) session.getAttribute("currentUser");
         if (user == null) {
@@ -49,14 +52,14 @@ public class AuthController {
         if (!userService.hasPermission(user.getUsername(), "/admin/users")) {
             throw new SecurityException("You do not have permission to access this feature");
         }
-        List<User> users = userService.searchUsers(username, fullName, email, departmentId, roleId)
-                .stream().filter(u -> !("admin".equalsIgnoreCase(u.getUsername()))).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userService.searchUsers(username, fullName, email, departmentId, roleId, pageable);
         List<Department> departments = departmentRepository.findAll();
         Map<Integer, String> managerNames = new HashMap<>();
         for (User u : userService.findAllUsersForAdmin()) {
             managerNames.put(u.getUserId(), u.getFullName());
         }
-        model.addAttribute("users", users);
+        model.addAttribute("userPage", userPage);
         model.addAttribute("departments", departments);
         model.addAttribute("managerNames", managerNames);
         model.addAttribute("username", username);
@@ -64,6 +67,8 @@ public class AuthController {
         model.addAttribute("email", email);
         model.addAttribute("departmentId", departmentId);
         model.addAttribute("roleId", roleId);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
         return "admin-users";
     }
 

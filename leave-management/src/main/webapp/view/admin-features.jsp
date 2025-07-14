@@ -11,6 +11,38 @@
             <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
             <link rel="stylesheet" href="/css/style.css">
             <link rel="stylesheet" href="/css/admin/styles.css">
+            <style>
+                .entrypoint-col {
+                    max-width: 200px;
+                    word-break: break-all;
+                    white-space: normal;
+                }
+
+                .table-responsive {
+                    overflow-x: auto;
+                    max-width: 100%;
+                }
+
+                .table {
+                    min-width: 100%;
+                    table-layout: auto;
+                }
+
+                .stats-card,
+                .bg-success,
+                .bg-info {
+                    cursor: pointer;
+                    transition: transform 0.15s, box-shadow 0.15s;
+                }
+
+                .stats-card:hover,
+                .bg-success:hover,
+                .bg-info:hover {
+                    transform: translateY(-4px) scale(1.03);
+                    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+                    z-index: 2;
+                }
+            </style>
         </head>
 
         <body class="admin-container">
@@ -44,7 +76,7 @@
                         <div class="card stats-card admin-card">
                             <div class="card-body text-center">
                                 <i class="fa-solid fa-list-check fa-2x mb-2"></i>
-                                <h4 class="mb-0">${features.size()}</h4>
+                                <h4 class="mb-0">${featurePage.totalElements}</h4>
                                 <p class="mb-0">Total Features</p>
                             </div>
                         </div>
@@ -132,7 +164,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <c:forEach var="feature" items="${features}">
+                                            <c:forEach var="feature" items="${featurePage.content}">
                                                 <tr class="feature-card">
                                                     <td style="color:#333;background:white;">
                                                         <span class="badge bg-primary"
@@ -158,7 +190,7 @@
                                     </table>
                                 </div>
 
-                                <c:if test="${empty features}">
+                                <c:if test="${featurePage.totalElements == 0}">
                                     <div class="empty-state">
                                         <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
                                         <h5 class="text-muted">No features found</h5>
@@ -166,6 +198,27 @@
                                             left.</p>
                                     </div>
                                 </c:if>
+                                <nav aria-label="Feature pagination" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        <c:if test="${featurePage.totalPages > 1}">
+                                            <li class="page-item ${featurePage.first ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                    href="?page=${featurePage.number - 1}&size=${featurePage.size}"
+                                                    tabindex="-1">Previous</a>
+                                            </li>
+                                            <c:forEach begin="0" end="${featurePage.totalPages - 1}" var="i">
+                                                <li class="page-item ${featurePage.number == i ? 'active' : ''}">
+                                                    <a class="page-link" href="?page=${i}&size=${featurePage.size}">${i
+                                                        + 1}</a>
+                                                </li>
+                                            </c:forEach>
+                                            <li class="page-item ${featurePage.last ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                    href="?page=${featurePage.number + 1}&size=${featurePage.size}">Next</a>
+                                            </li>
+                                        </c:if>
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>

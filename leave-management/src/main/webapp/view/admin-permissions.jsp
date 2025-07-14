@@ -11,6 +11,40 @@
             <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
             <link rel="stylesheet" href="/css/style.css">
             <link rel="stylesheet" href="/css/admin/styles.css">
+            <style>
+                .entrypoint-col {
+                    max-width: 200px;
+                    word-break: break-all;
+                    white-space: normal;
+                }
+
+                .table-responsive {
+                    overflow-x: auto;
+                    max-width: 100%;
+                }
+
+                .table {
+                    min-width: 100%;
+                    table-layout: auto;
+                }
+
+                .stats-card,
+                .bg-success,
+                .bg-info,
+                .bg-warning {
+                    cursor: pointer;
+                    transition: transform 0.15s, box-shadow 0.15s;
+                }
+
+                .stats-card:hover,
+                .bg-success:hover,
+                .bg-info:hover,
+                .bg-warning:hover {
+                    transform: translateY(-4px) scale(1.03);
+                    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+                    z-index: 2;
+                }
+            </style>
         </head>
 
         <body class="admin-container">
@@ -143,14 +177,14 @@
                                                         class="fa-solid fa-user-tag me-1"></i>Role</th>
                                                 <th style="color:#333;background:white;"><i
                                                         class="fa-solid fa-cog me-1"></i>Feature</th>
-                                                <th style="color:#333;background:white;"><i
+                                                <th style="color:#333;background:white;" class="entrypoint-col"><i
                                                         class="fa-solid fa-link me-1"></i>Entrypoint</th>
                                                 <th style="color:#333;background:white;"><i
                                                         class="fa-solid fa-cogs me-1"></i>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <c:forEach var="roleFeature" items="${roleFeatures}">
+                                            <c:forEach var="roleFeature" items="${roleFeaturePage.content}">
                                                 <tr class="feature-card">
                                                     <td style="color:#333;background:white;">
                                                         <span class="badge bg-primary"
@@ -160,7 +194,7 @@
                                                         <strong
                                                             style="color:#333;">${roleFeature.feature.featureName}</strong>
                                                     </td>
-                                                    <td style="color:#333;background:white;">
+                                                    <td style="color:#333;background:white;" class="entrypoint-col">
                                                         <code
                                                             style="color:#007bff;background:white;">${roleFeature.feature.entrypoint}</code>
                                                     </td>
@@ -177,7 +211,7 @@
                                     </table>
                                 </div>
 
-                                <c:if test="${empty roleFeatures}">
+                                <c:if test="${roleFeaturePage.totalElements == 0}">
                                     <div class="empty-state">
                                         <i class="fa-solid fa-key fa-3x text-muted mb-3"></i>
                                         <h5 class="text-muted">No permissions found</h5>
@@ -185,6 +219,27 @@
                                         </p>
                                     </div>
                                 </c:if>
+                                <nav aria-label="Permission pagination" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        <c:if test="${roleFeaturePage.totalPages > 1}">
+                                            <li class="page-item ${roleFeaturePage.first ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                    href="?page=${roleFeaturePage.number - 1}&size=${roleFeaturePage.size}"
+                                                    tabindex="-1">Previous</a>
+                                            </li>
+                                            <c:forEach begin="0" end="${roleFeaturePage.totalPages - 1}" var="i">
+                                                <li class="page-item ${roleFeaturePage.number == i ? 'active' : ''}">
+                                                    <a class="page-link"
+                                                        href="?page=${i}&size=${roleFeaturePage.size}">${i + 1}</a>
+                                                </li>
+                                            </c:forEach>
+                                            <li class="page-item ${roleFeaturePage.last ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                    href="?page=${roleFeaturePage.number + 1}&size=${roleFeaturePage.size}">Next</a>
+                                            </li>
+                                        </c:if>
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>

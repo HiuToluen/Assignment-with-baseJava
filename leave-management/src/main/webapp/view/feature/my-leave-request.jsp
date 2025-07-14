@@ -18,7 +18,7 @@
                         <h1>My Leave Requests</h1>
                     </div>
                     <c:choose>
-                        <c:when test="${empty myLeaveRequests}">
+                        <c:when test="${myLeaveRequests.totalElements == 0}">
                             <div class="text-center text-muted py-4">
                                 <i class="fa-solid fa-folder-open fa-2x mb-2"></i>
                                 <div>No leave requests found.</div>
@@ -37,7 +37,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <c:forEach var="req" items="${myLeaveRequests}">
+                                        <c:forEach var="req" items="${myLeaveRequests.content}">
                                             <tr>
                                                 <td>
                                                     <a
@@ -64,6 +64,28 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <!-- Pagination Controls -->
+                            <nav aria-label="Leave request pagination" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    <c:if test="${myLeaveRequests.totalPages > 1}">
+                                        <li class="page-item ${myLeaveRequests.first ? 'disabled' : ''}">
+                                            <a class="page-link"
+                                                href="?page=${myLeaveRequests.number - 1}&size=${myLeaveRequests.size}"
+                                                tabindex="-1">Previous</a>
+                                        </li>
+                                        <c:forEach begin="0" end="${myLeaveRequests.totalPages - 1}" var="i">
+                                            <li class="page-item ${myLeaveRequests.number == i ? 'active' : ''}">
+                                                <a class="page-link" href="?page=${i}&size=${myLeaveRequests.size}">${i
+                                                    + 1}</a>
+                                            </li>
+                                        </c:forEach>
+                                        <li class="page-item ${myLeaveRequests.last ? 'disabled' : ''}">
+                                            <a class="page-link"
+                                                href="?page=${myLeaveRequests.number + 1}&size=${myLeaveRequests.size}">Next</a>
+                                        </li>
+                                    </c:if>
+                                </ul>
+                            </nav>
                         </c:otherwise>
                     </c:choose>
                     <div class="mt-5 text-center">

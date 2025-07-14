@@ -41,8 +41,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("currentUser");
             if (user != null && !userService.hasPermission(user.getUsername(), request.getServletPath())) {
-                response.sendError(403, "You do not have permission to access this feature");
-                return false;
+                throw new SecurityException("You do not have permission to access this feature");
             }
         }
         return true;
