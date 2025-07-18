@@ -54,7 +54,7 @@
                 <!-- Action Buttons -->
                 <div class="action-buttons slide-up">
                     <c:choose>
-                        <c:when test="${errorMessage == 'You have not yet authenticated'}">
+                        <c:when test="${empty sessionScope.currentUser}">
                             <a href="${pageContext.request.contextPath}/login" class="btn-primary">
                                 <i class="fa-solid fa-sign-in-alt me-2"></i>Login
                             </a>

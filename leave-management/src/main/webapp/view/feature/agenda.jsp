@@ -64,10 +64,6 @@
                                                         <c:forEach var="date" items="${dateList}">
                                                             <th>
                                                                 <fmt:formatDate value="${date}" pattern="dd/MM" />
-                                                                <c:if test="${!workdayMap[date.time]}">
-                                                                    <span
-                                                                        style="display:block;font-size:0.85em;color:#888;">(Off)</span>
-                                                                </c:if>
                                                             </th>
                                                         </c:forEach>
                                                     </tr>
@@ -81,22 +77,11 @@
                                                             <c:forEach var="date" items="${dateList}">
                                                                 <c:set var="isOnLeave"
                                                                     value="${departmentUserLeaveMap[deptId][emp.userId][date.time]}" />
-                                                                <td>
+                                                                <td
+                                                                    style="background-color: ${isOnLeave ? '#e74c3c' : '#7bed9f'}; color: #222; text-align: center; font-weight: bold;">
                                                                     <c:choose>
-                                                                        <c:when test="${!workdayMap[date.time]}">
-                                                                            <span
-                                                                                style="background-color: #f1f1f1; color: #888; display: block; text-align: center; font-weight: bold;">Off</span>
-                                                                        </c:when>
-                                                                        <c:otherwise>
-                                                                            <span
-                                                                                style="background-color: ${isOnLeave ? '#e74c3c' : '#7bed9f'}; color: #222; display: block; text-align: center; font-weight: bold;">
-                                                                                <c:choose>
-                                                                                    <c:when test="${isOnLeave}">Leave
-                                                                                    </c:when>
-                                                                                    <c:otherwise>Work</c:otherwise>
-                                                                                </c:choose>
-                                                                            </span>
-                                                                        </c:otherwise>
+                                                                        <c:when test="${isOnLeave}">Leave</c:when>
+                                                                        <c:otherwise>Work</c:otherwise>
                                                                     </c:choose>
                                                                 </td>
                                                             </c:forEach>
@@ -123,10 +108,6 @@
                                                     <c:forEach var="date" items="${dateList}">
                                                         <th>
                                                             <fmt:formatDate value="${date}" pattern="dd/MM" />
-                                                            <c:if test="${!workdayMap[date.time]}">
-                                                                <span
-                                                                    style="display:block;font-size:0.85em;color:#888;">(Off)</span>
-                                                            </c:if>
                                                         </th>
                                                     </c:forEach>
                                                 </tr>
@@ -140,22 +121,11 @@
                                                         <c:forEach var="date" items="${dateList}">
                                                             <c:set var="isOnLeave"
                                                                 value="${departmentUserLeaveMap[deptId][emp.userId][date.time]}" />
-                                                            <td>
+                                                            <td
+                                                                style="background-color: ${isOnLeave ? '#e74c3c' : '#7bed9f'}; color: #222; text-align: center; font-weight: bold;">
                                                                 <c:choose>
-                                                                    <c:when test="${!workdayMap[date.time]}">
-                                                                        <span
-                                                                            style="background-color: #f1f1f1; color: #888; display: block; text-align: center; font-weight: bold;">Off</span>
-                                                                    </c:when>
-                                                                    <c:otherwise>
-                                                                        <span
-                                                                            style="background-color: ${isOnLeave ? '#e74c3c' : '#7bed9f'}; color: #222; display: block; text-align: center; font-weight: bold;">
-                                                                            <c:choose>
-                                                                                <c:when test="${isOnLeave}">Leave
-                                                                                </c:when>
-                                                                                <c:otherwise>Work</c:otherwise>
-                                                                            </c:choose>
-                                                                        </span>
-                                                                    </c:otherwise>
+                                                                    <c:when test="${isOnLeave}">Leave</c:when>
+                                                                    <c:otherwise>Work</c:otherwise>
                                                                 </c:choose>
                                                             </td>
                                                         </c:forEach>
