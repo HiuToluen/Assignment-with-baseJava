@@ -20,25 +20,21 @@
             </head>
 
             <body>
-                <!-- ======= Navbar ======= -->
-                <nav class="navbar navbar-expand-lg">
-                    <div class="container">
-                        <a class="navbar-brand d-flex align-items-center" href="#">
-                            <i class="fa-solid fa-plane-departure me-2"></i> Leave Management
-                        </a>
-
-                        <div class="user-info ms-auto">
-                            <div class="user-avatar">
-                                <c:out value="${currentUser.fullName.charAt(0)}" />
-                            </div>
-                            <span class="user-name d-none d-md-block">
-                                Welcome, <strong>
-                                    <c:out value="${currentUser.fullName}" />
-                                </strong>
-                            </span>
-                        </div>
+                <!-- Header với nút Logout đẹp -->
+                <div class="d-flex justify-content-between align-items-center p-3"
+                    style="background: #fff; border-bottom: 1px solid #e3e3e3;">
+                    <div>
+                        <span style="font-size:1.5rem;font-weight:600;color:#4e73df;"><i
+                                class="fa-solid fa-plane-departure me-2"></i>Leave Management</span>
                     </div>
-                </nav>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Welcome, <b>${currentUser.fullName}</b></span>
+                        <a href="#" class="btn btn-outline-danger btn-sm ms-2" data-bs-toggle="modal"
+                            data-bs-target="#logoutModal">
+                            <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                        </a>
+                    </div>
+                </div>
 
                 <!-- ======= Main Content ======= -->
                 <div class="container main-container">
@@ -135,42 +131,45 @@
                         </c:forEach>
                     </div>
 
-                    <!-- Logout Section (move to bottom) -->
-                    <div class="logout-section mt-auto" style="margin-top: auto;">
-                        <a href="${pageContext.request.contextPath}/logout" class="logout-btn"
-                            onclick="return confirm('Are you sure you want to logout?');">
-                            <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
-                        </a>
+                    <!-- Modal xác nhận logout -->
+                    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content" style="border-radius: 1rem;">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="logoutModalLabel">
+                                        <i class="fa-solid fa-sign-out-alt me-2"></i>Confirm Logout
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <p style="font-size:1.1em;">Are you sure you want to logout?</p>
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-secondary px-4"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <a href="${pageContext.request.contextPath}/logout"
+                                        class="btn btn-danger px-4">Logout</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Bootstrap Bundle JS -->
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                    <!-- Bootstrap Bundle JS -->
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-                <!-- Custom JavaScript for animations -->
-                <script>
-                    // Add loading animation to logout button
-                    document.querySelector('.logout-btn').addEventListener('click', function (e) {
-                        const originalText = this.innerHTML;
-                        this.innerHTML = '<span class="loading-spinner me-2"></span>Logging out...';
-                        this.disabled = true;
-
-                        // Reset after 2 seconds if user cancels
-                        setTimeout(() => {
-                            this.innerHTML = originalText;
-                            this.disabled = false;
-                        }, 2000);
-                    });
-
-                    // Add staggered animation to feature cards
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const cards = document.querySelectorAll('.feature-card');
-                        cards.forEach((card, index) => {
-                            card.style.animationDelay = `${index * 0.1}s`;
-                            card.classList.add('slide-up');
+                    <!-- Custom JavaScript for animations -->
+                    <script>
+                        // Add staggered animation to feature cards
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const cards = document.querySelectorAll('.feature-card');
+                            cards.forEach((card, index) => {
+                                card.style.animationDelay = `${index * 0.1}s`;
+                                card.classList.add('slide-up');
+                            });
                         });
-                    });
-                </script>
+                    </script>
             </body>
 
             </html>

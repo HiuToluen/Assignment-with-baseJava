@@ -62,8 +62,8 @@
                         <a href="${pageContext.request.contextPath}/admin/features" class="btn btn-outline-light me-2">
                             <i class="fa-solid fa-cogs me-1"></i> Features
                         </a>
-                        <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-light"
-                            onclick="return confirm('Are you sure?')">
+                        <!-- Nút logout -->
+                        <a href="#" class="btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">
                             <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
                         </a>
                     </div>
@@ -320,6 +320,28 @@
                                     <i class="fa-solid fa-cogs me-1"></i>Manage Features
                                 </a>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal xác nhận logout -->
+            <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 1rem;">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="logoutModalLabel">
+                                <i class="fa-solid fa-sign-out-alt me-2"></i>Confirm Logout
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <p style="font-size:1.1em;">Are you sure you want to logout?</p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                            <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger px-4">Logout</a>
                         </div>
                     </div>
                 </div>
