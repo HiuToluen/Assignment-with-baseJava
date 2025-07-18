@@ -317,10 +317,16 @@ public class UserFeatureController {
         }
         User processedBy = null;
         Role processedRole = null;
+        boolean canEditProcessed = false;
         if (leaveRequest.getProcessedBy() != null) {
             processedBy = userService.findById(leaveRequest.getProcessedBy());
             if (processedBy != null) {
                 processedRole = userService.getMainRole(processedBy.getUserId());
+                if (currentUser.getUserId() == processedBy.getUserId()) {
+                    canEditProcessed = true;
+                } else if (subordinateIds.contains(processedBy.getUserId())) {
+                    canEditProcessed = true;
+                }
             }
         }
         model.addAttribute("leaveRequest", leaveRequest);
@@ -333,6 +339,7 @@ public class UserFeatureController {
         model.addAttribute("isManager", isManager);
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("canEditProcessed", canEditProcessed);
         return "feature/request-detail";
     }
 

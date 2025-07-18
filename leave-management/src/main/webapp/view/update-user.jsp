@@ -118,6 +118,15 @@
                             </div>
                         </div>
 
+                        <!-- New Password -->
+                        <div class="form-group">
+                            <label for="newPassword" class="form-label">
+                                <i class="fa-solid fa-key me-2"></i>New Password
+                            </label>
+                            <input type="password" name="newPassword" id="newPassword" class="form-control"
+                                placeholder="Leave blank to keep current password" />
+                        </div>
+
                         <!-- Submit Button -->
                         <button type="submit" class="btn-primary" id="updateBtn">
                             <i class="fa-solid fa-save me-2"></i>Update User

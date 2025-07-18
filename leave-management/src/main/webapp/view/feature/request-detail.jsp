@@ -85,6 +85,30 @@
                         <c:if test="${leaveRequest.processedReason != null}">
                             <div class="mb-2"><b>Process note:</b> ${leaveRequest.processedReason}</div>
                         </c:if>
+                        <c:if
+                            test="${canEditProcessed && (leaveRequest.status == 'Approved' || leaveRequest.status == 'Rejected')}">
+                            <form action="${pageContext.request.contextPath}/feature/request/detail" method="post"
+                                class="mt-3">
+                                <input type="hidden" name="requestId" value="${leaveRequest.requestId}" />
+                                <div class="mb-2">
+                                    <label for="editStatus" class="form-label">Update Status:</label>
+                                    <select class="form-select" id="editStatus" name="action" required>
+                                        <option value="approve" ${leaveRequest.status=='Approved' ? 'selected' : '' }>
+                                            Approved</option>
+                                        <option value="reject" ${leaveRequest.status=='Rejected' ? 'selected' : '' }>
+                                            Rejected</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="editProcessReason" class="form-label">Process note:</label>
+                                    <textarea class="form-control" id="editProcessReason" name="processReason"
+                                        required>${leaveRequest.processedReason}</textarea>
+                                </div>
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button type="submit" class="btn btn-warning">Update Decision</button>
+                                </div>
+                            </form>
+                        </c:if>
                         <c:if test="${isManager && leaveRequest.status == 'Inprogress'}">
                             <form action="${pageContext.request.contextPath}/feature/request/detail" method="post"
                                 class="mt-3">

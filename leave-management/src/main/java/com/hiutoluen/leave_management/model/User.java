@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -39,10 +38,8 @@ public class User {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @NotNull(message = "Department ID is required")
-    @Min(value = 1, message = "Department ID must be positive")
     @Column(name = "department_id", nullable = false)
-    private int departmentId;
+    private Integer departmentId;
 
     @Column(name = "manager_id")
     private Integer managerId;
@@ -90,10 +87,10 @@ public class User {
     }
 
     public int getDepartmentId() {
-        return departmentId;
+        return departmentId != null ? departmentId : 0;
     }
 
-    public void setDepartmentId(int departmentId) {
+    public void setDepartmentId(Integer departmentId) {
         this.departmentId = departmentId;
     }
 

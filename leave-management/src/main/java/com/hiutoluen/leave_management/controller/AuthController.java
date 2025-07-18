@@ -3,6 +3,7 @@ package com.hiutoluen.leave_management.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -101,6 +102,7 @@ public class AuthController {
     @PostMapping("/admin/users/update")
     public String updateUser(@ModelAttribute User user,
             @RequestParam("roleId") Integer roleId,
+            @RequestParam(value = "newPassword", required = false) String newPassword,
             HttpSession session, Model model) {
         User currentUser = (User) session.getAttribute("currentUser");
         if (currentUser == null) {
@@ -119,6 +121,13 @@ public class AuthController {
         existingUser.setEmail(user.getEmail());
         existingUser.setDepartmentId(user.getDepartmentId());
         existingUser.setManagerId(user.getManagerId());
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            String fixedSalt = "$2a$12$abcdefghijklmnopqrstuv";
+            existingUser.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw(newPassword, fixedSalt));
+        }
+        if (Objects.equals(existingUser.getDepartmentId(), 0)) {
+            existingUser.setDepartmentId(1); // Giá trị mặc định, có thể thay đổi nếu cần
+        }
         userService.updateUser(existingUser, roleId, currentUser.getUserId());
         return "redirect:/admin/users";
     }
