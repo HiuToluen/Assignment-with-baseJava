@@ -103,7 +103,8 @@ public class AuthController {
     public String updateUser(@ModelAttribute User user,
             @RequestParam("roleId") Integer roleId,
             @RequestParam(value = "newPassword", required = false) String newPassword,
-            HttpSession session, Model model) {
+            @RequestParam(value = "confirm", required = false) Boolean confirm,
+            Model model, HttpSession session) {
         User currentUser = (User) session.getAttribute("currentUser");
         if (currentUser == null) {
             throw new SecurityException("You have not yet authenticated");
@@ -126,8 +127,52 @@ public class AuthController {
             existingUser.setPassword(org.mindrot.jbcrypt.BCrypt.hashpw(newPassword, fixedSalt));
         }
         if (Objects.equals(existingUser.getDepartmentId(), 0)) {
-            existingUser.setDepartmentId(1); // Giá trị mặc định, có thể thay đổi nếu cần
+            existingUser.setDepartmentId(1); // Default value, can be changed if needed
         }
+
+        // Check for Department Manager conflict
+        if (roleId == 3) {
+            User currentManager = userService.findCurrentDepartmentManager(user.getDepartmentId());
+            if (currentManager != null && currentManager.getUserId() != user.getUserId()
+                    && (confirm == null || !confirm)) {
+                model.addAttribute("confirmMessage", "This department already has a Department Manager: "
+                        + currentManager.getFullName()
+                        + ". Do you want to replace them? If you agree, the current manager will become an Employee.");
+                model.addAttribute("user", user);
+                model.addAttribute("roleId", roleId);
+                model.addAttribute("newPassword", newPassword);
+                model.addAttribute("confirmType", "departmentManager");
+                return "confirm-role-change";
+            }
+            // If confirmed, demote the old manager
+            if (currentManager != null && currentManager.getUserId() != user.getUserId()
+                    && Boolean.TRUE.equals(confirm)) {
+                userService.deleteExistingRoles(currentManager.getUserId());
+                userService.assignNewRole(currentManager, 1, currentUser.getUserId()); // 1 = Employee
+            }
+        }
+        // Check for Director conflict
+        if (roleId == 4) {
+            User currentDirector = userService.findCurrentDirector();
+            if (currentDirector != null && currentDirector.getUserId() != user.getUserId()
+                    && (confirm == null || !confirm)) {
+                model.addAttribute("confirmMessage", "The system already has a Director: "
+                        + currentDirector.getFullName()
+                        + ". Do you want to replace them? If you agree, the current Director will become an Employee.");
+                model.addAttribute("user", user);
+                model.addAttribute("roleId", roleId);
+                model.addAttribute("newPassword", newPassword);
+                model.addAttribute("confirmType", "director");
+                return "confirm-role-change";
+            }
+            // If confirmed, demote the old director
+            if (currentDirector != null && currentDirector.getUserId() != user.getUserId()
+                    && Boolean.TRUE.equals(confirm)) {
+                userService.deleteExistingRoles(currentDirector.getUserId());
+                userService.assignNewRole(currentDirector, 1, currentUser.getUserId()); // 1 = Employee
+            }
+        }
+
         userService.updateUser(existingUser, roleId, currentUser.getUserId());
         return "redirect:/admin/users";
     }

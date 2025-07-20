@@ -422,4 +422,37 @@ public class UserService {
     public Page<User> getUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
+
+    /**
+     * Find the current Department Manager for a given department.
+     * 
+     * @param departmentId the department ID
+     * @return the User who is the Department Manager, or null if none
+     */
+    public User findCurrentDepartmentManager(int departmentId) {
+        Department dept = departmentRepository.findById(departmentId).orElse(null);
+        if (dept != null && dept.getIdManager() != null) {
+            return userRepository.findById(dept.getIdManager()).orElse(null);
+        }
+        List<UserRole> managers = userRoleRepository.findByRole_RoleId(3); // 3 = Department Manager
+        for (UserRole ur : managers) {
+            if (ur.getUser().getDepartmentId() == departmentId) {
+                return ur.getUser();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find the current Director in the system.
+     * 
+     * @return the User who is the Director, or null if none
+     */
+    public User findCurrentDirector() {
+        List<UserRole> directors = userRoleRepository.findByRole_RoleId(4); // 4 = Director
+        if (!directors.isEmpty()) {
+            return directors.get(0).getUser();
+        }
+        return null;
+    }
 }
