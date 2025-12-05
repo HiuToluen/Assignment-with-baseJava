@@ -64,6 +64,11 @@
                                                         <c:forEach var="date" items="${dateList}">
                                                             <th>
                                                                 <fmt:formatDate value="${date}" pattern="dd/MM" />
+                                                                <c:if test="${holidayMap[date.time]}">
+                                                                    <span
+                                                                        style="color: #e67e22; font-size: 0.9em; font-weight: bold;">
+                                                                        (Holiday)</span>
+                                                                </c:if>
                                                             </th>
                                                         </c:forEach>
                                                     </tr>
@@ -78,8 +83,10 @@
                                                                 <c:set var="isOnLeave"
                                                                     value="${departmentUserLeaveMap[deptId][emp.userId][date.time]}" />
                                                                 <td
-                                                                    style="background-color: ${isOnLeave ? '#e74c3c' : '#7bed9f'}; color: #222; text-align: center; font-weight: bold;">
+                                                                    style="background-color: ${holidayMap[date.time] ? '#ffeaa7' : (isOnLeave ? '#e74c3c' : '#7bed9f')}; color: ${holidayMap[date.time] ? '#d35400' : '#222'}; text-align: center; font-weight: bold;">
                                                                     <c:choose>
+                                                                        <c:when test="${holidayMap[date.time]}">Holiday
+                                                                        </c:when>
                                                                         <c:when test="${isOnLeave}">Leave</c:when>
                                                                         <c:otherwise>Work</c:otherwise>
                                                                     </c:choose>
@@ -108,6 +115,11 @@
                                                     <c:forEach var="date" items="${dateList}">
                                                         <th>
                                                             <fmt:formatDate value="${date}" pattern="dd/MM" />
+                                                            <c:if test="${holidayMap[date.time]}">
+                                                                <span
+                                                                    style="color: #e67e22; font-size: 0.9em; font-weight: bold;">
+                                                                    (Holiday)</span>
+                                                            </c:if>
                                                         </th>
                                                     </c:forEach>
                                                 </tr>
@@ -122,8 +134,10 @@
                                                             <c:set var="isOnLeave"
                                                                 value="${departmentUserLeaveMap[deptId][emp.userId][date.time]}" />
                                                             <td
-                                                                style="background-color: ${isOnLeave ? '#e74c3c' : '#7bed9f'}; color: #222; text-align: center; font-weight: bold;">
+                                                                style="background-color: ${holidayMap[date.time] ? '#ffeaa7' : (isOnLeave ? '#e74c3c' : '#7bed9f')}; color: ${holidayMap[date.time] ? '#d35400' : '#222'}; text-align: center; font-weight: bold;">
                                                                 <c:choose>
+                                                                    <c:when test="${holidayMap[date.time]}">Holiday
+                                                                    </c:when>
                                                                     <c:when test="${isOnLeave}">Leave</c:when>
                                                                     <c:otherwise>Work</c:otherwise>
                                                                 </c:choose>

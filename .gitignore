@@ -2,3 +2,4 @@
 /TestSession/nbproject/private/
 /Session/nbproject/private/
 /Test2/nbproject/private/
+**/src/main/resources/application.properties

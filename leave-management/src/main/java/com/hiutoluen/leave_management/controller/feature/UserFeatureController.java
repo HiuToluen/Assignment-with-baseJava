@@ -170,15 +170,18 @@ public class UserFeatureController {
             cal.add(java.util.Calendar.DAY_OF_MONTH, 6);
             endDate = cal.getTime();
         }
-        // Build list of dates in range, đồng thời tạo map đánh dấu ngày làm việc
+        // Build list of dates in range, đồng thời tạo map đánh dấu ngày làm việc và
+        // ngày nghỉ
         List<java.util.Date> dateList = new java.util.ArrayList<>();
         Map<Long, Boolean> workdayMap = new HashMap<>(); // key: date.getTime(), value: true nếu là ngày làm việc
+        Map<Long, Boolean> holidayMap = new HashMap<>(); // key: date.getTime(), value: true nếu là ngày nghỉ (t7, cn)
         cal.setTime(startDate);
         while (!cal.getTime().after(endDate)) {
             int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
             boolean isWorkday = (dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY);
             dateList.add(cal.getTime());
             workdayMap.put(cal.getTime().getTime(), isWorkday);
+            holidayMap.put(cal.getTime().getTime(), !isWorkday); // true nếu là ngày nghỉ
             cal.add(Calendar.DAY_OF_MONTH, 1);
         }
 
@@ -187,6 +190,20 @@ public class UserFeatureController {
         Role mainRole = userService.getMainRole(user.getUserId());
         if (mainRole != null && "Director".equalsIgnoreCase(mainRole.getRoleName())) {
             isDirector = true;
+        }
+
+        // Nếu là director, đảm bảo workdayMap không đánh dấu thứ 7, CN là ngày làm việc
+        // (giữ nguyên logic)
+        // holidayMap đã đánh dấu sẵn các ngày nghỉ
+        if (isDirector) {
+            for (java.util.Date d : dateList) {
+                Calendar tmpCal = Calendar.getInstance();
+                tmpCal.setTime(d);
+                int dayOfWeek = tmpCal.get(Calendar.DAY_OF_WEEK);
+                if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
+                    workdayMap.put(d.getTime(), false);
+                }
+            }
         }
 
         Map<Integer, Department> departmentMap = new HashMap<>();
@@ -257,6 +274,7 @@ public class UserFeatureController {
         model.addAttribute("endDate", endDate);
         model.addAttribute("user", user);
         model.addAttribute("workdayMap", workdayMap);
+        model.addAttribute("holidayMap", holidayMap); // truyền ra view nếu cần
         return "feature/agenda";
     }
 
