@@ -1,4 +1,4 @@
-# Leave Management System / Hệ thống Quản lý Nghỉ phép
+# Module Leave Management System
 
 ## 📝 Giới thiệu / Introduction
 
